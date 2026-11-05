@@ -1,0 +1,1 @@
+"""Capability validation and resolution."""

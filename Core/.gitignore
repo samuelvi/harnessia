@@ -1,0 +1,35 @@
+# Private documentation subdirectories: never publish their contents.
+# Maintained product documentation elsewhere in docs/ stays versioned.
+/docs/sources/
+/docs/deliverables/
+/docs/wip/
+
+# Local configuration, runtime state and installed Sources
+/.idea/
+/.harnessia/
+/logs/
+/sources/*/
+/.work/
+
+# Generated client projections
+/.opencode/skills/
+/.claude/skills/
+
+# Credentials; example templates may be versioned
+.env
+.env.*
+!.env.example
+!.env.dist
+
+# Python and test caches
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Operating-system files
+.DS_Store

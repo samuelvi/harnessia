@@ -1,0 +1,4 @@
+# Publish only Core and this root ignore policy.
+/*
+!/.gitignore
+!/Core/
