@@ -183,7 +183,7 @@ def main(argv: list[str] | None = None, directory: Path | None = None) -> int:
                     )
                 else:
                     print(
-                        f"No approved skill changes for Space "
+                        f"No approved capability changes for Space "
                         f"{registered.id}/{arguments.id}."
                     )
                 return 0

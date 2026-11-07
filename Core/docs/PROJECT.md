@@ -165,3 +165,26 @@ The root `.gitignore` was reduced to the publication boundary only: ignore all r
 - `Core/docs/sources/`, `Core/docs/deliverables/`, `Core/docs/wip/`, `Core/.harnessia/`, `Core/logs/` and `Core/.idea/` are private ignored local material, not published project content. Maintained references elsewhere in `Core/docs/` remain versioned. No sibling folder is versioned by default.
 
 There is no mandatory implementation or acceptance work left. Future changes are deliberate maintenance.
+## Purpose-specific MCP curation — 2026-11-07
+
+`space-configure` now recommends skills and MCP servers according to the Space's
+purpose, including useful services not configured yet. The maintained curator and
+Core maintenance instructions share `docs/mcp-guide.md`. A bounded, best-effort
+OpenCode API request records only validated server IDs and known statuses; raw
+configuration, connection errors and credentials are not persisted. Selection
+approval remains separate from installation and authentication. The transaction
+allows only `skills` and `mcp` changes and retains Definition/projection rollback.
+
+Claude no longer rejects a nonempty OpenCode MCP selection: it still generates an
+empty catalog and denies MCP calls. Strict startup needs no dummy server or tool
+schema. A synthetic installed-CLI control-protocol smoke confirmed zero MCP servers
+despite a project MCP configuration, without sending a user prompt or model request.
+This is startup evidence, not a token benchmark or an interactive recommendation
+quality evaluation.
+
+`make verify` passed 158 tests and read-only validation of Core, the registered Work
+Instance and fourteen Spaces. Explicit read-only validation of unregistered Personal
+passed for both Spaces without changing registration. Live OpenCode discovery
+confirmed the updated curator's default-deny permissions, edit approval and question
+access. Local Work/Personal operating guides were updated outside the publication
+boundary; their capability selections were preserved.

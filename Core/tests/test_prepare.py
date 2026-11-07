@@ -107,6 +107,26 @@ skills:
         self.assertEqual(len(logs), 1)
         self.assertIn("WARNING Preparation stopped", logs[0].read_text())
 
+    def test_selected_mcp_only_enables_opencode_and_keeps_claude_empty(self):
+        definition = self.space / "SPACE.md"
+        definition.write_text(definition.read_text().replace(
+            "---\n\n# Example", "mcp: [playwright, context7]\n---\n\n# Example"
+        ))
+
+        prepare_instance(self.core, self.instance, "example-space")
+
+        config = json.loads((self.space / "opencode.jsonc").read_text().split("\n", 1)[1])
+        self.assertEqual(config["policies"], [
+            {"action": "integration.use", "resource": "mcp:*", "effect": "deny"},
+            {"action": "integration.use", "resource": "mcp:playwright", "effect": "allow"},
+            {"action": "integration.use", "resource": "mcp:context7", "effect": "allow"},
+        ])
+        self.assertEqual(json.loads(
+            (self.space / ".claude/harnessia-mcp.json").read_text()
+        ), {"mcpServers": {}})
+        settings = json.loads((self.space / ".claude/settings.json").read_text())
+        self.assertEqual(settings["permissions"]["deny"], ["mcp__*"])
+
     def test_prepares_selected_agents_as_native_links(self):
         agent = self.instance.sources / "example/agents/reviewer.md"
         agent.parent.mkdir(parents=True)

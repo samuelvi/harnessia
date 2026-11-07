@@ -1,6 +1,8 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
 import os
+import json
+import subprocess
 import unittest
 from unittest.mock import patch
 
@@ -61,7 +63,10 @@ class SpaceAssistantTest(unittest.TestCase):
 
     def fake_opencode(self, body: str = "exit 0\n") -> Path:
         executable = self.root / "fake-opencode"
-        executable.write_text("#!/bin/sh\n" + body)
+        executable.write_text("#!/bin/sh\n"
+            'if [ "$1" = "api" ]; then\n'
+            '  printf \'%s\\n\' \'{"data":[{"name":"playwright","status":{"status":"connected"}}]}\'\n'
+            '  exit 0\nfi\n' + body)
         executable.chmod(0o755)
         return executable
 
@@ -102,6 +107,77 @@ class SpaceAssistantTest(unittest.TestCase):
         catalog = result.catalog.read_text()
         self.assertIn('"source": "core/shared"', catalog)
         self.assertNotIn("Sandbox", catalog)
+        self.assertIn("MCP", prompt)
+        self.assertIn("mcp-inventory.json", prompt)
+        self.assertIn("mcp-guide.md", prompt)
+        inventory = json.loads((result.catalog.parent / "mcp-inventory.json").read_text())
+        self.assertEqual(inventory["servers"], [{"id": "playwright", "status": "connected"}])
+
+    def test_prepares_approved_mcp_selection_without_installing_servers(self):
+        executable = self.fake_opencode(
+            "cat > \"$FAKE_SPACE\" <<'EOF'\n"
+            "---\nversion: 2\nskills: []\nmcp: [playwright, not-installed]\n---\n\n# Atlas\n"
+            "EOF\n"
+        )
+        with patch.dict(os.environ, {"FAKE_SPACE": str(self.space / "SPACE.md")}):
+            result = configure_space(self.core, self.instance, "atlas",
+                                     executable=executable, require_tty=False)
+        self.assertTrue(result.changed)
+        config = (self.space / "opencode.jsonc").read_text()
+        self.assertIn("mcp:not-installed", config)
+        self.assertNotIn('"servers"', config)
+        self.assertEqual(json.loads((self.space / ".claude/harnessia-mcp.json").read_text()),
+                         {"mcpServers": {}})
+
+    def test_unavailable_inventory_does_not_block_curation(self):
+        executable = self.fake_opencode()
+        with patch("app.space_assistant.read_mcp_inventory", return_value={
+            "available": False, "servers": []
+        }):
+            result = configure_space(self.core, self.instance, "atlas",
+                                     executable=executable, require_tty=False)
+        inventory = json.loads((result.catalog.parent / "mcp-inventory.json").read_text())
+        self.assertFalse(inventory["available"])
+        self.assertFalse(result.changed)
+
+    def test_invalid_mcp_or_unrelated_fields_restore_definition_and_projections(self):
+        prepare_instance(self.core, self.instance, "atlas")
+        definition = self.space / "SPACE.md"
+        before = definition.read_text()
+        targets = (self.space / "opencode.jsonc", self.space / ".claude/settings.json",
+                   self.space / ".claude/harnessia-mcp.json")
+        output_before = [path.read_bytes() for path in targets]
+        for field in ("mcp: [playwright, playwright]", "mcp: [INVALID]",
+                      "agents: []", "commands: []", "version: 1"):
+            with self.subTest(field=field):
+                proposal = before.replace("skills: []", "skills: []\n" + field)
+                executable = self.fake_opencode(
+                    "cat > \"$FAKE_SPACE\" <<'EOF'\n" + proposal + "EOF\n"
+                )
+                with patch.dict(os.environ, {"FAKE_SPACE": str(definition)}):
+                    with self.assertRaises(HarnessiaError):
+                        configure_space(self.core, self.instance, "atlas",
+                                        executable=executable, require_tty=False)
+                self.assertEqual(definition.read_text(), before)
+                self.assertEqual([path.read_bytes() for path in targets], output_before)
+
+    def test_mcp_edit_rolls_back_when_claude_projection_cannot_be_written(self):
+        prepare_instance(self.core, self.instance, "atlas")
+        definition = self.space / "SPACE.md"
+        before = definition.read_text()
+        opencode_before = (self.space / "opencode.jsonc").read_bytes()
+        executable = self.fake_opencode(
+            "cat > \"$FAKE_SPACE\" <<'EOF'\n" +
+            before.replace("skills: []", "skills: []\nmcp: [playwright]") + "EOF\n"
+        )
+        with patch.dict(os.environ, {"FAKE_SPACE": str(definition)}), patch(
+            "app.projections.claude._write_text", side_effect=OSError("disk full")
+        ):
+            with self.assertRaisesRegex(HarnessiaError, "disk full"):
+                configure_space(self.core, self.instance, "atlas",
+                                executable=executable, require_tty=False)
+        self.assertEqual(definition.read_text(), before)
+        self.assertEqual((self.space / "opencode.jsonc").read_bytes(), opencode_before)
 
     def test_prepares_approved_space_definition_after_assistant_exits(self):
         executable = self.fake_opencode(
@@ -209,6 +285,8 @@ class SpaceAssistantTest(unittest.TestCase):
         original = (self.space / "SPACE.md").read_text()
 
         def interrupt(*args, **kwargs):
+            if args[0][1] == "api":
+                return subprocess.CompletedProcess(args[0], 0, '{"data": []}', "")
             (self.space / "SPACE.md").write_text("# interrupted proposal")
             raise KeyboardInterrupt
 
@@ -224,7 +302,7 @@ class SpaceAssistantTest(unittest.TestCase):
 
         self.assertEqual((self.space / "SPACE.md").read_text(), original)
 
-    def test_restores_definition_when_proposal_changes_more_than_skills(self):
+    def test_restores_definition_when_proposal_changes_body(self):
         original = (self.space / "SPACE.md").read_text()
         executable = self.fake_opencode(
             "cat > \"$FAKE_SPACE\" <<'EOF'\n"
@@ -236,7 +314,7 @@ class SpaceAssistantTest(unittest.TestCase):
         )
         with patch.dict(os.environ, {"FAKE_SPACE": str(self.space / "SPACE.md")}):
             with self.assertRaisesRegex(
-                HarnessiaError, "may change only the skills field"
+                HarnessiaError, "may change only the skills and mcp fields"
             ):
                 configure_space(
                     self.core,
@@ -336,8 +414,12 @@ class SpaceCuratorAgentTest(unittest.TestCase):
         for action in ("shell", "subagent", "webfetch", "websearch"):
             self.assertEqual(permissions[action], "deny")
         self.assertEqual(permissions["skill"], "deny")
+        self.assertEqual(permissions["*"], "deny")
+        self.assertEqual(permissions["question"], "allow")
         self.assertIn("explicitly approves the exact selection", body)
-        self.assertIn("modify only the `skills` field", body)
+        self.assertIn("modify only the `skills` and `mcp` fields", body)
+        self.assertIn("not configured", body)
+        self.assertIn("Never install", body)
 
 
 if __name__ == "__main__":

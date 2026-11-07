@@ -9,6 +9,7 @@ These rules apply when maintaining Harnessia itself, including its engine, defin
 - Use the selected Matt Pocock skills when they fit the task; use `ask-matt` when the appropriate flow is unclear. Do not use Superpowers.
 - Keep private working material in Core `docs/sources/`, `docs/wip/` and `docs/deliverables/`, all excluded by `Core/.gitignore`. Plans are independent files under `docs/wip/plans/`; backups belong to `docs/wip/backups/`. Do not overwrite historical material or force-add these ignored directories. Maintained product references elsewhere in `Core/docs/` remain versioned. Do not offer or publish Harnessia material to Atlassian Artifacts unless the user explicitly requests it.
 - Keep every repository used for Harnessia maintenance under `sources/<source-id>/` and declare reproducible repositories in Core `SOURCES.yaml`. A Space may select it only through `core/<source-id>`.
+- When configuring a Space, recommend both skills and purpose-specific MCP servers following `docs/mcp-guide.md`, including useful servers not configured yet. Distinguish observed availability from recommendations; obtain approval for the exact selection and separate approval before installation or authentication. Never enable all global MCP servers by default.
 
 ## Skill discovery
 

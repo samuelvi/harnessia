@@ -35,7 +35,7 @@ Context is inherited in that order; later layers have higher priority. The repos
 
 ## Get started
 
-You need `make`, Git and [`uv`](https://docs.astral.sh/uv/). Generated configurations support OpenCode 2.1.4 or newer and Claude Code 2.1.220 or newer. The interactive skill configuration command additionally requires the `opencode` CLI and a terminal.
+You need `make`, Git and [`uv`](https://docs.astral.sh/uv/). Generated configurations support OpenCode 2.1.4 or newer and Claude Code 2.1.220 or newer. The interactive capability configuration command additionally requires the `opencode` CLI and a terminal.
 
 From the cloned repository root, enter `Core/` before running any Harnessia command:
 
@@ -67,7 +67,7 @@ The script is fail-closed and performs the following sequence:
 - If the Instance directory is absent, `instance-create` creates its minimum structure and registers it. If the directory already exists, `instance-attach` validates and registers it without recreating it. An existing directory must already be a valid Instance.
 - `sources-clone` installs missing pinned Sources so the curator can consider their skills.
 - If the Space path is absent, `space-create` creates and prepares it. A regular directory without `SPACE.md` is initialized by `space-attach`, which adds only missing Harnessia files and preserves all prior content. A path with a regular `SPACE.md` is already initialized and creation is skipped. Other collisions are preserved and reported.
-- `space-configure` requires the registered Instance and existing Space. It opens the curator, applies only an explicitly approved skill selection and prepares both client projections.
+- `space-configure` requires the registered Instance and existing Space. It opens the curator, recommends skills and purpose-specific MCP servers, applies only an explicitly approved selection and prepares both client projections. It can recommend missing servers but never installs or authenticates them.
 - `check` finishes with a read-only validation of the target Instance.
 
 `INSTANCE` and `SPACE` are not interchangeable: use `INSTANCE=Work SPACE=atlas`, not the reverse. Instance names are case-sensitive; Space IDs use lowercase letters, digits and single hyphens.
@@ -93,7 +93,7 @@ To use a Space, open its directory directly in OpenCode or Claude Code. Harnessi
 | Attach and register an Instance | `make instance-attach INSTANCE=<id> INSTANCE_PATH=<path>` |
 | Create and prepare a Space | `make space-create INSTANCE=<id> SPACE=<space-id>` |
 | Attach and prepare an existing Space directory | `make space-attach INSTANCE=<id> SPACE=<space-id>` |
-| Interactively configure a Space's skills | `make space-configure INSTANCE=<id> SPACE=<space-id>` |
+| Interactively configure a Space's skills and MCP selection | `make space-configure INSTANCE=<id> SPACE=<space-id>` |
 | Validate without changing generated files | `make check [INSTANCE=<id>]` |
 | List registered Instances | `make instance-list` |
 | Run the tests | `make test` |
@@ -157,6 +157,8 @@ OpenCode supports selected skills, agents, commands and MCP allowlists. Claude C
 ```sh
 claude --setting-sources project --strict-mcp-config --mcp-config .claude/harnessia-mcp.json
 ```
+
+MCP connections are configured once in OpenCode's user or managed configuration; each Space explicitly selects IDs under `mcp` in `SPACE.md`. The curator uses a sanitized name/status inventory and the [MCP selection guide](docs/mcp-guide.md), including recommendations for servers not configured yet. Manual changes require `make prepare INSTANCE=<id> SPACE=<space-id>`. Claude always receives an empty MCP catalog, even with a nonempty OpenCode selection: no dummy server or MCP tool schema is added.
 
 The linked project and documentation remain external working content. Harnessia validates their boundaries but does not inspect them or treat their files as instructions or capabilities.
 

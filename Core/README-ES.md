@@ -35,7 +35,7 @@ El contexto se hereda en ese orden; las capas posteriores tienen mayor prioridad
 
 ## Primeros pasos
 
-Necesitas `make`, Git y [`uv`](https://docs.astral.sh/uv/). Las configuraciones generadas son compatibles con OpenCode 2.1.4 o posterior y Claude Code 2.1.220 o posterior. El comando interactivo de configuración de skills requiere además la CLI `opencode` y un terminal.
+Necesitas `make`, Git y [`uv`](https://docs.astral.sh/uv/). Las configuraciones generadas son compatibles con OpenCode 2.1.4 o posterior y Claude Code 2.1.220 o posterior. El comando interactivo de configuración de capacidades requiere además la CLI `opencode` y un terminal.
 
 Desde la raíz del repositorio clonado, entra en `Core/` antes de ejecutar cualquier comando de Harnessia:
 
@@ -67,7 +67,7 @@ El script es fail-closed y ejecuta esta secuencia:
 - Si no existe el directorio de la Instance, `instance-create` crea su estructura mínima y la registra. Si el directorio ya existe, `instance-attach` lo valida y registra sin volver a crearlo. Un directorio existente debe ser ya una Instance válida.
 - `sources-clone` instala los Sources fijados que falten para que el curador pueda considerar sus skills.
 - Si no existe la ruta del Space, `space-create` lo crea y prepara. Un directorio regular sin `SPACE.md` se inicializa mediante `space-attach`, que añade solo los archivos Harnessia ausentes y conserva todo el contenido previo. Una ruta con un `SPACE.md` regular ya está inicializada y se omite su creación. Las demás colisiones se conservan y reportan.
-- `space-configure` requiere la Instance registrada y el Space existente. Abre el curador, aplica solo una selección de skills aprobada explícitamente y prepara las proyecciones de ambos clientes.
+- `space-configure` requiere la Instance registrada y el Space existente. Abre el curador, recomienda skills y servidores MCP según el objetivo, aplica solo una selección aprobada explícitamente y prepara las proyecciones de ambos clientes. Puede recomendar servidores que falten, pero nunca los instala ni autentica.
 - `check` termina con una validación de solo lectura de la Instance objetivo.
 
 `INSTANCE` y `SPACE` no son intercambiables: usa `INSTANCE=Work SPACE=atlas`, no al revés. Los nombres de Instance distinguen mayúsculas y minúsculas; los IDs de Space usan letras minúsculas, dígitos y guiones simples.
@@ -93,7 +93,7 @@ Para usar un Space, abre directamente su directorio en OpenCode o Claude Code. H
 | Conectar y registrar una Instance | `make instance-attach INSTANCE=<id> INSTANCE_PATH=<path>` |
 | Crear y preparar un Space | `make space-create INSTANCE=<id> SPACE=<space-id>` |
 | Conectar y preparar un directorio de Space existente | `make space-attach INSTANCE=<id> SPACE=<space-id>` |
-| Configurar interactivamente las skills de un Space | `make space-configure INSTANCE=<id> SPACE=<space-id>` |
+| Configurar interactivamente las skills y selección MCP de un Space | `make space-configure INSTANCE=<id> SPACE=<space-id>` |
 | Validar sin cambiar los archivos generados | `make check [INSTANCE=<id>]` |
 | Listar las Instances registradas | `make instance-list` |
 | Ejecutar los tests | `make test` |
@@ -157,6 +157,8 @@ OpenCode admite skills, agents, commands y listas permitidas de MCP. Claude Code
 ```sh
 claude --setting-sources project --strict-mcp-config --mcp-config .claude/harnessia-mcp.json
 ```
+
+Las conexiones MCP se configuran una sola vez en la configuración de usuario o administrada de OpenCode; cada Space selecciona explícitamente sus IDs bajo `mcp` en `SPACE.md`. El curador utiliza un inventario saneado de nombres y estados y la [guía de selección MCP](docs/mcp-guide.md), incluyendo recomendaciones de servidores aún no configurados. Los cambios manuales requieren `make prepare INSTANCE=<id> SPACE=<space-id>`. Claude siempre recibe un catálogo MCP vacío, incluso con una selección no vacía en OpenCode: no se añade ningún servidor dummy ni esquema de herramientas MCP.
 
 El proyecto y la documentación enlazados siguen siendo contenido de trabajo externo. Harnessia valida sus límites, pero no los inspecciona ni trata sus archivos como instrucciones o capacidades.
 

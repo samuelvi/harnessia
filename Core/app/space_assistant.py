@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import json
 import os
 from pathlib import Path
 import shutil
@@ -9,6 +10,7 @@ import sys
 from uuid import uuid4
 
 from .layout import CoreLayout, InstanceLayout
+from .mcp_inventory import read_mcp_inventory
 from .prepare import PrepareResult, prepare_instance
 from .skill_catalog import build_skill_catalog, render_skill_catalog
 from .space import HarnessiaError, load_instance_space, parse_frontmatter
@@ -49,12 +51,21 @@ def _assistant_executable(executable: Path | str | None) -> str:
 
 
 def _prompt(
-    definition: Path, catalog: Path, instance_id: str, space_id: str
+    definition: Path,
+    catalog: Path,
+    inventory: Path,
+    guide: Path,
+    instance_id: str,
+    space_id: str,
 ) -> str:
     return (
-        f"Configure the skills for Harnessia Space {instance_id}/{space_id}.\n"
+        f"Configure the skills and MCP selection for Harnessia Space {instance_id}/{space_id}.\n"
         f"The client-agnostic definition is {definition}.\n"
         f"The local candidate index is {catalog}.\n"
+        f"The sanitized OpenCode MCP inventory is {inventory}.\n"
+        f"The MCP recommendation guide is {guide}.\n"
+        "Recommend MCP servers by purpose, including useful servers not configured. "
+        "Do not install or authenticate anything; separate recommendations from availability. "
         f"Use skills only from Core and Instance {instance_id}; do not search "
         "external Sources or other Instances. Follow the space-curator agent "
         "workflow, ask only for missing information, and do not edit until the "
@@ -112,14 +123,15 @@ def _record_proposal_or_restore(
         ) from error
 
 
-def _validate_skills_only(before: str, after: str, definition_path: Path) -> None:
+def _validate_selection_only(before: str, after: str, definition_path: Path) -> None:
     before_data, before_body = parse_frontmatter(before, definition_path)
     after_data, after_body = parse_frontmatter(after, definition_path)
-    before_other = {key: value for key, value in before_data.items() if key != "skills"}
-    after_other = {key: value for key, value in after_data.items() if key != "skills"}
+    allowed = {"skills", "mcp"}
+    before_other = {key: value for key, value in before_data.items() if key not in allowed}
+    after_other = {key: value for key, value in after_data.items() if key not in allowed}
     if before_body != after_body or before_other != after_other:
         raise HarnessiaError(
-            f"{definition_path}: space-configure may change only the skills field"
+            f"{definition_path}: space-configure may change only the skills and mcp fields"
         )
 
 
@@ -161,6 +173,11 @@ def configure_space(
         catalog_path = artifact_directory / "skills.jsonl"
         catalog_path.write_text(render_skill_catalog(build_skill_catalog(definition)))
         (artifact_directory / "SPACE.before.md").write_text(before)
+        inventory_path = artifact_directory / "mcp-inventory.json"
+        inventory_path.write_text(
+            json.dumps(read_mcp_inventory(assistant_executable, core.directory), indent=2)
+            + "\n"
+        )
     except OSError as error:
         raise HarnessiaError(
             f"{artifact_directory}: cannot create configuration artifacts: {error}"
@@ -172,7 +189,14 @@ def configure_space(
         "--agent",
         "space-curator",
         "--prompt",
-        _prompt(definition_path, catalog_path, instance.id, space_id),
+        _prompt(
+            definition_path,
+            catalog_path,
+            inventory_path,
+            core.directory / "docs/mcp-guide.md",
+            instance.id,
+            space_id,
+        ),
     )
     try:
         completed = subprocess.run(command, cwd=core.directory)
@@ -226,7 +250,7 @@ def configure_space(
                 raise HarnessiaError(
                     f"{definition_path}: assistant removed Space Definition"
                 )
-            _validate_skills_only(before, after, definition_path)
+            _validate_selection_only(before, after, definition_path)
             preparation = prepare_instance(core, instance, space_id)
         except (Exception, KeyboardInterrupt):
             _replace_definition(definition_path, before, before_mode)

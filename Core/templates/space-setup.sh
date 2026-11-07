@@ -79,8 +79,9 @@ else
   make space-create INSTANCE="$INSTANCE" SPACE="$SPACE"
 fi
 
-# Open the restricted OpenCode Mini curator. It proposes local skills and edits
-# SPACE.md only after explicit approval; Harnessia prepares both client outputs.
+# Open the restricted OpenCode Mini curator. It proposes local skills and MCP
+# access, including installation gaps, but never installs or authenticates MCPs.
+# It edits SPACE.md only after approval; Harnessia prepares both client outputs.
 make space-configure INSTANCE="$INSTANCE" SPACE="$SPACE"
 
 # Finish with a read-only validation of the target Instance and all its Spaces.

@@ -65,12 +65,6 @@ def render_claude_settings(space: EffectiveSpace) -> dict[str, object]:
 
 
 def build_claude_plan(space: EffectiveSpace) -> ProjectionPlan:
-    if space.definition.mcp_servers:
-        raise HarnessiaError(
-            f"{space.definition.directory / 'SPACE.md'}: Claude projection currently "
-            "supports only an empty MCP selection"
-        )
-
     directory = space.definition.directory
     claude_file = directory / "CLAUDE.md"
     claude_directory = directory / ".claude"
