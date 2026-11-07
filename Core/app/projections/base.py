@@ -49,7 +49,11 @@ def validate_projection_plans(plans: tuple[ProjectionPlan, ...]) -> None:
         plan.validate()
 
 
-def apply_projection_plans(plans: tuple[ProjectionPlan, ...]) -> None:
+def apply_projection_plans(
+    plans: tuple[ProjectionPlan, ...],
+    *,
+    after_write: Callable[[], None] | None = None,
+) -> None:
     validate_projection_plans(plans)
     targets = tuple(target for plan in plans for target in plan.targets)
 
@@ -63,7 +67,10 @@ def apply_projection_plans(plans: tuple[ProjectionPlan, ...]) -> None:
             backups.append((target, backup))
         for plan in plans:
             plan.write()
-    except (HarnessiaError, OSError):
+        if after_write is not None:
+            after_write()
+    except BaseException:
+        # Roll back cancellations and unexpected write failures as well as I/O errors.
         for target, backup in reversed(backups):
             _remove(target)
             if backup is not None and _present(backup):
@@ -72,4 +79,9 @@ def apply_projection_plans(plans: tuple[ProjectionPlan, ...]) -> None:
     else:
         for _, backup in backups:
             if backup is not None:
-                _remove(backup)
+                try:
+                    _remove(backup)
+                except (OSError, KeyboardInterrupt):
+                    # Output is committed. Retain a stale backup rather than signal
+                    # failure and let callers restore only the maintained Definition.
+                    pass

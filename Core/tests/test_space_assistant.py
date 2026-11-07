@@ -10,6 +10,7 @@ from app.__main__ import main
 from app.instances import register_instance
 from app.layout import CoreLayout, InstanceLayout
 from app.prepare import prepare_instance
+from app.prepare import RunLog
 from app.space_assistant import configure_space
 from app.space import HarnessiaError, parse_frontmatter
 
@@ -178,6 +179,70 @@ class SpaceAssistantTest(unittest.TestCase):
                                 executable=executable, require_tty=False)
         self.assertEqual(definition.read_text(), before)
         self.assertEqual((self.space / "opencode.jsonc").read_bytes(), opencode_before)
+
+    def test_mcp_edit_rolls_back_when_projection_writes_are_interrupted(self):
+        prepare_instance(self.core, self.instance, "atlas")
+        definition = self.space / "SPACE.md"
+        before = definition.read_text()
+        output_before = (self.space / "opencode.jsonc").read_bytes()
+        executable = self.fake_opencode(
+            "cat > \"$FAKE_SPACE\" <<'EOF'\n" +
+            before.replace("skills: []", "skills: []\nmcp: [playwright]") + "EOF\n"
+        )
+        for error in (KeyboardInterrupt, RuntimeError):
+            with self.subTest(error=error.__name__), patch.dict(
+                os.environ, {"FAKE_SPACE": str(definition)}
+            ), patch("app.projections.claude._write_text", side_effect=error):
+                with self.assertRaises(error):
+                    configure_space(self.core, self.instance, "atlas",
+                                    executable=executable, require_tty=False)
+            self.assertEqual(definition.read_text(), before)
+            self.assertEqual((self.space / "opencode.jsonc").read_bytes(), output_before)
+            self.assertTrue((self.space / "CLAUDE.md").is_file())
+
+    def test_mcp_edit_rolls_back_when_completion_logging_fails(self):
+        prepare_instance(self.core, self.instance, "atlas")
+        definition = self.space / "SPACE.md"
+        before = definition.read_text()
+        output_before = (self.space / "opencode.jsonc").read_bytes()
+        executable = self.fake_opencode(
+            "cat > \"$FAKE_SPACE\" <<'EOF'\n" +
+            before.replace("skills: []", "skills: []\nmcp: [playwright]") + "EOF\n"
+        )
+        original_info = RunLog.info
+
+        def fail_completion(log, message):
+            if message == "Preparation completed":
+                raise OSError("completion log unavailable")
+            original_info(log, message)
+
+        with patch.dict(os.environ, {"FAKE_SPACE": str(definition)}), patch.object(
+            RunLog, "info", fail_completion
+        ):
+            with self.assertRaisesRegex(HarnessiaError, "completion log unavailable"):
+                configure_space(self.core, self.instance, "atlas",
+                                executable=executable, require_tty=False)
+        self.assertEqual(definition.read_text(), before)
+        self.assertEqual((self.space / "opencode.jsonc").read_bytes(), output_before)
+
+    def test_backup_cleanup_failure_keeps_committed_mcp_selection_consistent(self):
+        definition = self.space / "SPACE.md"
+        before = definition.read_text()
+        executable = self.fake_opencode(
+            "cat > \"$FAKE_SPACE\" <<'EOF'\n" +
+            before.replace("skills: []", "skills: []\nmcp: [playwright]") + "EOF\n"
+        )
+        for error in (OSError, KeyboardInterrupt):
+            definition.write_text(before)
+            prepare_instance(self.core, self.instance, "atlas")
+            with self.subTest(error=error.__name__), patch.dict(
+                os.environ, {"FAKE_SPACE": str(definition)}
+            ), patch("app.projections.base._remove", side_effect=error):
+                result = configure_space(self.core, self.instance, "atlas",
+                                         executable=executable, require_tty=False)
+            self.assertTrue(result.changed)
+            self.assertIn("mcp: [playwright]", definition.read_text())
+            self.assertIn("mcp:playwright", (self.space / "opencode.jsonc").read_text())
 
     def test_prepares_approved_space_definition_after_assistant_exits(self):
         executable = self.fake_opencode(

@@ -32,7 +32,7 @@ _Avoid_: Real project, generated workspace, profile
 **Space Definition** — The maintained `SPACE.md` inside a Space. Its YAML frontmatter is the sole client-agnostic capability selection.
 _Avoid_: `INDEX.md`, client configuration
 
-**Space Configuration Assistant** — The explicit OpenCode Mini session started by `space-configure` to curate one Space's `skills` field from valid Core and owning-Instance candidates. Harnessia, not the agent, validates and prepares the approved result.
+**Space Configuration Assistant** — The explicit OpenCode Mini session started by `space-configure` to curate one Space's `skills` and `mcp` fields. Skills come from valid Core and owning-Instance candidates; MCP recommendations follow the Space purpose and may include services not configured yet. Harnessia, not the agent, validates and prepares the approved result. Installation and authentication remain separate approved operations.
 _Avoid_: General work launcher, automatic Source discovery, autonomous editor
 
 **Core Definition** — The maintained `HARNESSIA.md` in Core. It selects maintenance skills only from Core Sources.

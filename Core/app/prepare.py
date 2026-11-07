@@ -66,6 +66,12 @@ def _space_id_from_reference(reference: str) -> str:
 def _apply_space_consumer(core: CoreLayout, consumer: ConsumerPlan) -> PrepareResult:
     log = RunLog(core, _space_id_from_reference(consumer.consumer))
     log.info(f"Starting preparation for {consumer.consumer}")
+
+    def complete() -> None:
+        for plan in consumer.projections:
+            log.info(f"Generated {plan.client} projection")
+        log.info("Preparation completed")
+
     try:
         log.info(f"Validated Space Definition {consumer.definition}")
         log.info(f"Validated {len(consumer.skill_ids)} effective skills")
@@ -73,10 +79,7 @@ def _apply_space_consumer(core: CoreLayout, consumer: ConsumerPlan) -> PrepareRe
         log.info(f"Validated {len(consumer.command_ids)} effective commands")
         for warning in consumer.warnings:
             log.warning(warning)
-        apply_projection_plans(consumer.projections)
-        for plan in consumer.projections:
-            log.info(f"Generated {plan.client} projection")
-        log.info("Preparation completed")
+        apply_projection_plans(consumer.projections, after_write=complete)
         return PrepareResult(
             projections=tuple(
                 target
@@ -130,13 +133,16 @@ def _apply_core_consumer(
 ) -> PrepareResult:
     log = RunLog(core, "core")
     log.info("Starting preparation for Core")
-    try:
-        log.info(f"Validated Core Definition {consumer.definition}")
-        log.info(f"Validated {len(consumer.skill_ids)} effective Core skills")
-        apply_projection_plans(consumer.projections)
+
+    def complete() -> None:
         for plan in consumer.projections:
             log.info(f"Generated {plan.client} projection")
         log.info("Core preparation completed")
+
+    try:
+        log.info(f"Validated Core Definition {consumer.definition}")
+        log.info(f"Validated {len(consumer.skill_ids)} effective Core skills")
+        apply_projection_plans(consumer.projections, after_write=complete)
         return PrepareResult(
             projections=tuple(
                 target

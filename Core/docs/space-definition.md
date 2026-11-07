@@ -40,6 +40,8 @@ The restricted `space-curator` agent uses the Space purpose and asks only for mi
 
 The assistant may change only `skills` and `mcp`; the Markdown body and every other frontmatter field must remain semantically unchanged. It does not prepare projections itself. Once OpenCode Mini exits with status zero, Harnessia validates the proposal and prepares both clients. No change is a successful cancellation and performs no preparation. A missing TTY or executable fails before launch. Interruption, non-zero exit, deletion, invalid Definition, invalid capability selection, a change outside `skills` and `mcp` or preparation failure restores the original `SPACE.md`; transactional projection generation preserves the previous client output.
 
+The curator's file scope is instruction-enforced: its read/search tools and external-directory access are broad, and every edit asks for approval. The deterministic guard validates only the target Definition; it is not a filesystem sandbox and cannot restore unrelated edits. Do not approve changes to other files in this session.
+
 Ignored run evidence lives under `Core/.harnessia/space-configure/<Instance>/<Space>/<run-id>/`, separate from versioned product documentation and private working drafts. Every started run contains `SPACE.before.md`, `skills.jsonl` and sanitized `mcp-inventory.json`; a changed Definition also produces `SPACE.proposed.md`, or a marker when the assistant removed or made the file unreadable. `HARNESSIA_OPENCODE` may name an alternate executable; otherwise Harnessia resolves `opencode` from `PATH`.
 
 ## Agent contract

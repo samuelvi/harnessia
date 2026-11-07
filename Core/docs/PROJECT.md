@@ -165,6 +165,7 @@ The root `.gitignore` was reduced to the publication boundary only: ignore all r
 - `Core/docs/sources/`, `Core/docs/deliverables/`, `Core/docs/wip/`, `Core/.harnessia/`, `Core/logs/` and `Core/.idea/` are private ignored local material, not published project content. Maintained references elsewhere in `Core/docs/` remain versioned. No sibling folder is versioned by default.
 
 There is no mandatory implementation or acceptance work left. Future changes are deliberate maintenance.
+
 ## Purpose-specific MCP curation — 2026-11-07
 
 `space-configure` now recommends skills and MCP servers according to the Space's
@@ -182,7 +183,14 @@ despite a project MCP configuration, without sending a user prompt or model requ
 This is startup evidence, not a token benchmark or an interactive recommendation
 quality evaluation.
 
-`make verify` passed 158 tests and read-only validation of Core, the registered Work
+The review also reproduced a pre-existing rollback gap that could leave a generated
+MCP allowlist inconsistent with a restored Definition after write interruption or
+completion-log failure. Projection rollback now covers unexpected exceptions and
+interruptions, completion logging runs inside that transaction, and post-commit
+backup cleanup is best-effort. Regression tests cover those paths and cleanup
+failure/interruption without reverting an already committed selection.
+
+`make verify` passed 161 tests and read-only validation of Core, the registered Work
 Instance and fourteen Spaces. Explicit read-only validation of unregistered Personal
 passed for both Spaces without changing registration. Live OpenCode discovery
 confirmed the updated curator's default-deny permissions, edit approval and question
