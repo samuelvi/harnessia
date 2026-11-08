@@ -2,6 +2,8 @@
 
 `HARNESSIA.md` is the portable capability selection for sessions that maintain Core. It is not a Space Definition and does not affect the capability selection inside any Space.
 
+The maintained selection includes Caveman chat and relevant Matt Pocock maintenance methods. `AGENTS.md` routes maintenance sessions to the shared task/capability contract in `INSTRUCTIONS.md`; capability availability alone does not prove activation or authorize the actions described by an imported workflow.
+
 ## Schema
 
 `HARNESSIA.md` is Markdown with a required YAML frontmatter mapping:

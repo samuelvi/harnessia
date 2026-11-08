@@ -111,6 +111,9 @@ class SpaceAssistantTest(unittest.TestCase):
         self.assertIn("MCP", prompt)
         self.assertIn("mcp-inventory.json", prompt)
         self.assertIn("mcp-guide.md", prompt)
+        self.assertIn(str(self.core.directory / "INSTRUCTIONS.md"), prompt)
+        self.assertIn("purpose-appropriate Matt Pocock skills", prompt)
+        self.assertIn("Exclude Superpowers and default caveman-compress", prompt)
         inventory = json.loads((result.catalog.parent / "mcp-inventory.json").read_text())
         self.assertEqual(inventory["servers"], [{"id": "playwright", "status": "connected"}])
 

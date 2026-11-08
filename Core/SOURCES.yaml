@@ -72,10 +72,6 @@ sources:
   url: https://github.com/softaworks/agent-toolkit.git
   branch: main
   revision: 3027f20f3181758385a1bb8c022d4041dfb4de84
-- id: superpowers
-  url: https://github.com/obra/superpowers.git
-  branch: dev
-  revision: b58deb3b948d4c305feeac122700100419ee2777
 - id: vercel-skills
   url: https://github.com/vercel-labs/skills.git
   branch: main

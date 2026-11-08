@@ -2,6 +2,14 @@
 
 Status: initial implementation and operational acceptance completed on 2026-10-26. This file preserves dated Core delivery observations; the [README](../README.md), [current design](DESIGN.md), [Core Definition](core-definition.md) and [Space Definition](space-definition.md) references describe current behavior. Historical Instance and Consumer counts are acceptance measurements, not a current installation inventory. Instance-owned configuration and project evidence remain outside Core.
 
+## Shared collaboration contract — 2026-11-08
+
+Core's shared SOUL and instructions now define purpose-sensitive judgment, proportional validation, Matt-first methodology, concise Caveman chat, explicit choices before added agents/specialist consultation/worktrees, bounded delegation and resumable checkpoints. Maintenance instructions reuse the same task/capability contract. The curator prompt references it and recommends only applicable Matt skills plus Caveman; exact selection still requires approval. User-invoked workflows, external effects and file compression retain their separate authorization boundaries.
+
+The Core Definition now selects 30 skills, including Caveman. Superpowers was removed from the reproducible catalog; its clean local checkout and Git history were preserved outside the active Source tree rather than deleted. This is authoring policy, not a new schema, automatic capability inheritance, semantic prose enforcement or autonomous runtime. Maintained Harnessia instructions/guides use English except `README-ES.md`; third-party content, prior evidence and agreed deliverable languages are preserved.
+
+`make verify` passed all 161 tests, twenty pinned Sources across registered owners and fifteen registered Consumers. Explicit local-layout validation also checked unregistered Consumers without changing the registry. Both client projections were regenerated and compared with their effective selections; MCP selections were preserved. Local helper negative tests and 92 maintained-file relative-link checks passed. These checks establish configuration consistency, not live model behavior or token savings. Instance-specific adaptations and resumption evidence remain in ignored/local working material, not the published product inventory.
+
 ## Initial delivery — 2026-10-26
 
 Harnessia delivered isolated, purpose-specific AI Spaces built from reusable capability Sources. Each maintained `SPACE.md` resolved into one client-agnostic `EffectiveSpace`, then into fail-closed OpenCode and Claude Code projections without copying or translating capability bodies.

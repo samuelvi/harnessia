@@ -44,6 +44,9 @@ _Avoid_: OpenCode configuration, Claude plugin
 **Effective Space Context** — The ordered active Markdown and validated Capability inventories resolved for one Space. Markdown follows Core → Instance → Space priority within its defined role; later paths have higher priority.
 _Avoid_: Every Markdown file, Client Projection
 
+**Collaboration Contract** — The shared task, validation, capability and approval rules in Core `INSTRUCTIONS.md`, specialized by each Space's purpose. It is instruction-level guidance, not runtime enforcement or permission expansion.
+_Avoid_: Autonomous runtime, capability inheritance
+
 **Consumer** — Core or a Space when selecting Capabilities from Sources.
 _Avoid_: Space when referring to both Core and Spaces
 
@@ -58,3 +61,6 @@ _Avoid_: Generated Core link, operating instructions, automatic learning
 
 **Space Memory** — The optional bounded `MEMORY.md` maintained inside one Space. It holds verified durable facts, decisions and one resumable checkpoint, not a transcript or document index.
 _Avoid_: Global memory, knowledge base
+
+**Checkpoint** — One concise, evidence-linked resumption record at a meaningful phase boundary, interruption or handoff. The collaboration contract defines its contents; the working agent maintains it, not preparation.
+_Avoid_: Transcript, automatic memory service, approval

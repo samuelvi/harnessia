@@ -38,6 +38,8 @@ Imported IDs must be unique. Valid custom skills under `capabilities/custom/skil
 
 The restricted `space-curator` agent uses the Space purpose and asks only for missing task, deliverable, technology, workflow and risk context. It shortlists skills from the index, reads only finalist `SKILL.md` bodies and follows the [MCP selection guide](mcp-guide.md). It proposes a minimal required set plus optional and rejected alternatives, including useful MCP servers not configured yet, with availability, usage triggers, authentication, cost and data/write risks. It must receive approval for the exact lists before editing. It cannot use shell, web, MCP tools or subagents, install or authenticate servers; OpenCode asks before every edit. MCP installation remains a separate approved maintenance operation.
 
+The opening prompt points to Core's [shared collaboration contract](../INSTRUCTIONS.md). Curation recommends Caveman chat and only applicable Matt Pocock skills/dependencies, respecting user-invoked-only triggers. It excludes Superpowers and default `caveman-compress`, including conflicting imported recommendations. These are authoring instructions, not new schema fields or automatic capability inheritance; an installed but deselected Source may still appear in the local catalog.
+
 The assistant may change only `skills` and `mcp`; the Markdown body and every other frontmatter field must remain semantically unchanged. It does not prepare projections itself. Once OpenCode Mini exits with status zero, Harnessia validates the proposal and prepares both clients. No change is a successful cancellation and performs no preparation. A missing TTY or executable fails before launch. Interruption, non-zero exit, deletion, invalid Definition, invalid capability selection, a change outside `skills` and `mcp` or preparation failure restores the original `SPACE.md`; transactional projection generation preserves the previous client output.
 
 The curator's file scope is instruction-enforced: its read/search tools and external-directory access are broad, and every edit asks for approval. The deterministic guard validates only the target Definition; it is not a filesystem sandbox and cannot restore unrelated edits. Do not approve changes to other files in this session.
@@ -77,11 +79,15 @@ Core, Instance and Space SOUL files and Core, Instance and Space `INSTRUCTIONS.m
 
 Optional `MEMORY.md` must be a maintained regular file. It cannot be symlinked, generated or external, and preparation never creates, summarizes or modifies it. Keep only verified durable facts, explicit decisions and the latest useful checkpoint; current code, tests and user direction take precedence. Replace stale entries and never store transcripts, secrets, credentials, personal data, absolute paths or speculation. Loading memory adds no MCP, process, network request or model call.
 
+The shared collaboration contract defines when the working agent maintains a checkpoint and its minimal contents. Keep one task record under `docs/wip/`; existing Space memory may retain a short current checkpoint with pointers, not a duplicate evidence log. Preparation itself performs no checkpoint update.
+
 Optional `project` and `documentation` links must resolve to directories outside the Space. Preparation validates only their boundaries and never inspects or activates AI files in linked content. Broken links fail validation; they are machine-local bindings and must be repaired after their targets move.
 
 ## Effective Space
 
 Preparation resolves one client-agnostic effective Space. Its active Markdown is ordered from lowest to highest priority: Core SOUL, optional Instance SOUL, Space SOUL, Core instructions, optional Instance instructions, Space instructions and optional Space memory. Client adapters consume the same ordered paths without changing maintained content.
+
+Later context specializes task and technical behavior. The shared contract forbids silent weakening of safety/approval rules or permission expansion through skills/memory; conflicts must be surfaced. The engine orders files but does not semantically adjudicate their prose or enforce an autonomous runtime. Agents and clients remain responsible for following instructions and actual runtime permissions.
 
 This inheritance is role-based, not a scan of every Markdown file. `INDEX.md` is navigation, `SPACE.md` is a Definition, and README or linked documentation is reference material. They never become active instructions merely because they exist at more than one level.
 

@@ -1,6 +1,8 @@
 ---
 version: 1
 skills:
+  - source: core/caveman
+    path: skills/caveman
   - source: core/mattpocock-skills
     path: skills/engineering/ask-matt
   - source: core/mattpocock-skills
