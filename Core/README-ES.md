@@ -144,6 +144,8 @@ Core selecciona `find-skills`, de Vercel, para buscar en el ecosistema y `skill-
 
 Los Sources fijados de Core también incluyen `docker-skills`, de Docker, y `microsoft-playwright-cli`, de Microsoft, para flujos opcionales de contenedores y navegador. Cada Consumer selecciona sus capacidades exactas de forma independiente; clonar estos repositorios no instala Docker, el CLI de Playwright, navegadores ni dependencias, no arranca servicios ni autoriza limpiezas. La instalación y comprobación de compatibilidad del runtime siguen siendo operaciones separadas y explícitas.
 
+El Source `googlechrome-modern-web-guidance`, de Google Chrome, proporciona `skills/modern-web-guidance` para HTML, CSS, APIs del navegador, accesibilidad y compatibilidad modernos. Cada Consumer lo selecciona de forma independiente. Sus guías locales siguen la revisión fijada del Source; su CLI npm no, y descargar o ejecutar un runtime revisado requiere aprobación separada.
+
 ## Qué contiene un Space
 
 El [contrato de colaboración compartido](INSTRUCTIONS.md) adapta el rigor y la validación al desarrollo, investigación, consultoría, backlog o documentos. Prefiere los métodos Matt Pocock seleccionados que encajan, usa Caveman para un chat conciso, excluye Superpowers y exige que el usuario elija antes de añadir agentes, consulta especializada o worktrees. El curador recomienda Caveman y solo las skills Matt adecuadas al propósito; la selección requiere aprobación exacta y no se hereda automáticamente. Los Spaces nuevos empiezan con selecciones vacías hasta configurarlos.

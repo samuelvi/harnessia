@@ -144,6 +144,8 @@ Core selects Vercel's `find-skills` for ecosystem retrieval and Codesigils' `ski
 
 Pinned Core Sources also include Docker's `docker-skills` and Microsoft's `microsoft-playwright-cli` for optional container and browser workflows. Consumers select their exact capabilities independently; cloning these repositories does not install Docker, the Playwright CLI, browser binaries or dependencies, start services, or authorize cleanup. Runtime installation and compatibility checks remain separate, explicit operations.
 
+Google Chrome's `googlechrome-modern-web-guidance` Source provides `skills/modern-web-guidance` for modern HTML, CSS, browser APIs, accessibility and compatibility. Consumers select it independently. Its local guides follow the Source pin; its npm CLI does not, and downloading or executing a reviewed runtime requires separate approval.
+
 ## What a Space contains
 
 A shared [collaboration contract](INSTRUCTIONS.md) adapts rigor and validation to engineering, research, consulting, backlog or document work. It prefers applicable selected Matt Pocock methods, uses concise Caveman chat, excludes Superpowers and requires a user choice before additional agents, specialist consultation or worktrees. The curator recommends Caveman and only purpose-appropriate Matt skills; selection still requires exact approval and is not automatic inheritance. New Spaces start with empty selections until configured.

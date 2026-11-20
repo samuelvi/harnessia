@@ -2,6 +2,34 @@
 
 Status: initial implementation and operational acceptance completed on 2026-10-26. This file preserves dated Core delivery observations; the [README](../README.md), [current design](DESIGN.md), [Core Definition](core-definition.md) and [Space Definition](space-definition.md) references describe current behavior. Historical Instance and Consumer counts are acceptance measurements, not a current installation inventory. Instance-owned configuration and project evidence remain outside Core.
 
+## Architecture and modern web Sources — 2026-11-15
+
+Added three explicitly approved repositories to Core's [Source manifest](../SOURCES.yaml)
+and cloned them through the existing `make sources-clone` lifecycle:
+
+- `ddd-skills`: `full-stack-skills/ddd-skills`, pinned at
+  `04596b5786e89ec70a019e795908fe1bdb3ad457` (Apache-2.0).
+- `uncle-bob`: `robert-hoffmann/uncle-bob`, pinned at
+  `3185d182c8d358d17a62485cb20f13024a81e429` (MIT).
+- `googlechrome-modern-web-guidance`: `GoogleChrome/modern-web-guidance`, pinned
+  at `4dd968349e54ca45a05dd5c818fb035c9054b022` (Apache-2.0 code;
+  CC-BY-4.0 guide content).
+
+All three retain their upstream `main` branch, origin and clean worktree.
+Installation does not change Core's capability selection, activate entire
+catalogs, install npm CLIs or plugins, or authorize their execution. In
+particular, pinning Google's Source does not pin the npm `@latest` execution
+suggested by its skill. Runtime download/execution needs separate approval.
+DDD implementation examples are largely Java/Spring-oriented; the Uncle Bob
+Source is Robert Hoffmann's collection, not an official Robert C. Martin
+distribution. Consumers must account for these constraints in their selection.
+
+`make verify` passed all 161 tests, 23 pinned Sources across registered owners
+and 15 registered Consumers. This establishes engine/catalog consistency,
+not behavior testing of third-party skills or their optional tools. Local
+Instance configuration and its validation evidence remain with the Instance;
+the Source addition did not register or regenerate other Consumers.
+
 ## Shared collaboration contract — 2026-11-08
 
 Core's shared SOUL and instructions now define purpose-sensitive judgment, proportional validation, Matt-first methodology, concise Caveman chat, explicit choices before added agents/specialist consultation/worktrees, bounded delegation and resumable checkpoints. Maintenance instructions reuse the same task/capability contract. The curator prompt references it and recommends only applicable Matt skills plus Caveman; exact selection still requires approval. User-invoked workflows, external effects and file compression retain their separate authorization boundaries.

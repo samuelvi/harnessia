@@ -32,6 +32,10 @@ sources:
   url: https://github.com/rinaldofesta/cto-os-skills.git
   branch: main
   revision: 861135841815863aba289b5a4b675dcea67fac3e
+- id: ddd-skills
+  url: https://github.com/full-stack-skills/ddd-skills.git
+  branch: main
+  revision: 04596b5786e89ec70a019e795908fe1bdb3ad457
 - id: diagram-design
   url: https://github.com/cathrynlavery/diagram-design.git
   branch: main
@@ -40,6 +44,10 @@ sources:
   url: https://github.com/docker/skills.git
   branch: main
   revision: 090ff3d39db5f8bc55d4e951c26218e7c95ea2d3
+- id: googlechrome-modern-web-guidance
+  url: https://github.com/GoogleChrome/modern-web-guidance.git
+  branch: main
+  revision: 4dd968349e54ca45a05dd5c818fb035c9054b022
 - id: mahipal-cybersecurity-skills
   url: https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git
   branch: main
@@ -72,6 +80,10 @@ sources:
   url: https://github.com/softaworks/agent-toolkit.git
   branch: main
   revision: 3027f20f3181758385a1bb8c022d4041dfb4de84
+- id: uncle-bob
+  url: https://github.com/robert-hoffmann/uncle-bob.git
+  branch: main
+  revision: 3185d182c8d358d17a62485cb20f13024a81e429
 - id: vercel-skills
   url: https://github.com/vercel-labs/skills.git
   branch: main
