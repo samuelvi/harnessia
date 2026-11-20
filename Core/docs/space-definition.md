@@ -68,6 +68,8 @@ A Space is an AI collaboration pseudo-project, not the real project itself. It k
 | `MEMORY.md` | Optional maintained memory, limited to 32 KiB and loaded after instructions. |
 | `INDEX.md` | Optional local navigation. It is not active context or capability selection. |
 | `capabilities/custom/` | Optional local skills, agents and commands. |
+| `work/<project-id>/` | Agent-maintained project workspace; its `docs/` has `sources/`, `wip/` and `deliverables/`. The shared contract owns the convention; preparation neither creates nor rewrites it. |
+| `docs/` | Optional Space-shared templates and setup evidence, not project-specific artifacts. |
 | `project`, `documentation` | Optional machine-local symlinks to the real project and its supporting documentation. These external working directories remain separate from the Space; Instance ignore policy excludes the links from a future repository. |
 | `opencode.jsonc`, `CLAUDE.md`, `.opencode/`, `.claude/` | Generated Client Projections; do not edit. |
 
@@ -79,7 +81,7 @@ Core, Instance and Space SOUL files and Core, Instance and Space `INSTRUCTIONS.m
 
 Optional `MEMORY.md` must be a maintained regular file. It cannot be symlinked, generated or external, and preparation never creates, summarizes or modifies it. Keep only verified durable facts, explicit decisions and the latest useful checkpoint; current code, tests and user direction take precedence. Replace stale entries and never store transcripts, secrets, credentials, personal data, absolute paths or speculation. Loading memory adds no MCP, process, network request or model call.
 
-The shared collaboration contract defines when the working agent maintains a checkpoint and its minimal contents. Keep one task record under `docs/wip/`; existing Space memory may retain a short current checkpoint with pointers, not a duplicate evidence log. Preparation itself performs no checkpoint update.
+The shared collaboration contract defines the project workspace convention, when the working agent maintains a checkpoint and its minimal contents. Keep one task record under the active project's `docs/wip/` (`work/<project-id>/docs/wip/` from the Space root); existing Space memory may retain a short current checkpoint with pointers, not a duplicate evidence log. Preparation itself performs no checkpoint update or project-directory creation. Nested project SOUL and instruction files are not automatically included in the effective context.
 
 Optional `project` and `documentation` links must resolve to directories outside the Space. Preparation validates only their boundaries and never inspects or activates AI files in linked content. Broken links fail validation; they are machine-local bindings and must be repaired after their targets move.
 

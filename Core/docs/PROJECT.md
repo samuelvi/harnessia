@@ -232,3 +232,52 @@ passed for both Spaces without changing registration. Live OpenCode discovery
 confirmed the updated curator's default-deny permissions, edit approval and question
 access. Local Work/Personal operating guides were updated outside the publication
 boundary; their capability selections were preserved.
+
+## Shared project workspaces and web guidance — 2026-11-20
+
+The shared collaboration contract now places bounded Space projects and initiatives
+under `work/<project-id>/docs/{sources,wip,deliverables}`. Existing external product
+repositories remain at their authorized locations; local application code may live
+beside a project's docs. Space-level docs retain genuinely shared templates and setup
+evidence. Core maintenance keeps its repository-owned documentation layout. This is
+an inherited working convention, not a schema addition, nested Space, automatic
+context loader or engine-driven content migration.
+
+An approved local maintenance pass reviewed fifteen Work and five unregistered
+Personal Spaces. It moved 29 local paths into 21 project workspaces, verified all
+8,950 files remained present, and changed only twelve live text files within those
+moved trees. Originals, binaries, archived evidence and backups retained their
+bytes. Active navigation and local artifact helpers were repaired; four legacy
+directory aliases preserve running readers and immutable paths, and four local
+reference links preserve historical citations. A bounded scan of 137 migrated
+Markdown files found no newly broken local links. Both existing reader HTTP
+endpoints returned 200 without service restart. Private inventory and verification
+evidence remain in ignored Core working material, outside publication.
+
+General technical-design and evidence-based judgment preferences were consolidated
+in Core SOUL. Purpose-specific review, Jira, deployment and language preferences
+remain local. Duplicate or conflicting artifact-location instructions were removed
+from active Space and project instructions; historical instructions remain evidence.
+
+Google Chrome's existing Source was retained and its `modern-web-guidance` skill
+selected in six additional Spaces, for seven Consumers in total. Web experiments
+and QA report interfaces have explicit usage limits. The shared contract separates
+the pinned local guides from the separately approved npm runtime; no CLI installer,
+new runtime dependency, browser installation or Source-owned execution was run.
+
+After reviewing selected skill changes and compatibility, twelve Core Source
+repositories fast-forwarded and their manifest pins were reconciled. Nine were
+already current. BMAD remains at its previous reviewed revision: the new tree moves
+both selected skills and changes the analyst's workflow dependencies, requiring a
+separate capability migration rather than silent selection expansion. Instance
+Sources and manifests were not updated, and Personal was not registered.
+
+All 162 engine tests pass, including a new regression confirming repeated
+preparation preserves project workspaces without importing nested context. Core and
+all twenty local Spaces validated; both client projections were regenerated, and
+the twenty Space projection pairs match their rendered Definitions and inherit
+Core context. All twenty-two pinned Core Sources match clean clones. The aggregate
+`make verify` passes tests but remains blocked by a pre-existing Work Source origin
+mismatch (`bitbucket.org` in its manifest versus `ssh.bitbucket.org` in the clone);
+that unrelated binding was preserved. These are configuration and filesystem checks,
+not proof of interactive client activation, browser behavior or product deployment.

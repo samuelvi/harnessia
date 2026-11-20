@@ -107,6 +107,25 @@ skills:
         self.assertEqual(len(logs), 1)
         self.assertIn("WARNING Preparation stopped", logs[0].read_text())
 
+    def test_project_workspaces_are_preserved_without_nested_context_loading(self):
+        project = self.space / "work" / "chef-calendar"
+        for category in ("sources", "wip", "deliverables"):
+            (project / "docs" / category).mkdir(parents=True)
+        evidence = project / "docs" / "wip" / "checkpoint.md"
+        evidence.write_text("Verified project evidence\n")
+        (project / "SOUL.md").write_text("Project-specific preference\n")
+        (project / "INSTRUCTIONS.md").write_text("Project-only instructions\n")
+
+        prepare_instance(self.core, self.instance, "example-space")
+        prepare_instance(self.core, self.instance, "example-space")
+
+        self.assertEqual(evidence.read_text(), "Verified project evidence\n")
+        self.assertEqual((project / "SOUL.md").read_text(), "Project-specific preference\n")
+        config = json.loads((self.space / "opencode.jsonc").read_text().split("\n", 1)[1])
+        self.assertFalse(any("work/" in path for path in config["instructions"]))
+        self.assertNotIn("work/", (self.space / "CLAUDE.md").read_text())
+        self.assertFalse((project / "opencode.jsonc").exists())
+
     def test_selected_mcp_only_enables_opencode_and_keeps_claude_empty(self):
         definition = self.space / "SPACE.md"
         definition.write_text(definition.read_text().replace(

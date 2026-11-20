@@ -32,6 +32,9 @@ _Avoid_: Real project, generated workspace, profile
 **Space Definition** — The maintained `SPACE.md` inside a Space. Its YAML frontmatter is the sole client-agnostic capability selection.
 _Avoid_: `INDEX.md`, client configuration
 
+**Project Workspace** — One bounded project or initiative within a Space, also called a pseudo-project in task discussions. Its working root is `work/<project-id>/`, containing `docs/sources/`, `docs/wip/` and `docs/deliverables/`. It may contain local application code or coordinate work on an existing external repository. It is not another Space and does not automatically add active context or capabilities.
+_Avoid_: Space, external `project` link, capability Source
+
 **Space Configuration Assistant** — The explicit OpenCode Mini session started by `space-configure` to curate one Space's `skills` and `mcp` fields. Skills come from valid Core and owning-Instance candidates; MCP recommendations follow the Space purpose and may include services not configured yet. Harnessia, not the agent, validates and prepares the approved result. Installation and authentication remain separate approved operations.
 _Avoid_: General work launcher, automatic Source discovery, autonomous editor
 
