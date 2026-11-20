@@ -3,7 +3,7 @@ sources:
 - id: addyosmani-agent-skills
   url: https://github.com/addyosmani/agent-skills.git
   branch: main
-  revision: aeac41d4d005999432bb7312f7ff06383a91d59d
+  revision: 8c99fa36d90068c82d547f7c12a9d67a3e95f4ee
 - id: agent-rules-books
   url: https://github.com/ciembor/agent-rules-books.git
   branch: main
@@ -11,7 +11,7 @@ sources:
 - id: anthropics-knowledge-work-plugins
   url: https://github.com/anthropics/knowledge-work-plugins.git
   branch: main
-  revision: 2574e29377c7173d0cecffef29a6ecbd7f8ccb5d
+  revision: 0e0fcacddcc892eb92a1b7873ff9d68159c47571
 - id: bmad
   url: https://github.com/bmad-code-org/BMAD-METHOD.git
   branch: main
@@ -19,15 +19,15 @@ sources:
 - id: caveman
   url: https://github.com/JuliusBrussee/caveman.git
   branch: main
-  revision: 9b68f7ed12b05e7efaff18e65c5a3fc2849fd0a4
+  revision: a192894723a8f47e7f504c7b5041967ff1f18e55
 - id: codelytv-agent-harness
   url: https://github.com/CodelyTV/agent-harness.git
   branch: main
-  revision: 57090a7301d15722b8885570e239bdd3e719a835
+  revision: ddf2be2219c8e029ead8bd0947aa3e087a25d7e8
 - id: codesigils-skill-discovery
   url: https://github.com/codesigils/skill-discovery.git
   branch: main
-  revision: dc03be0ffbe4ec17f6dfb3a0e16c99b6b009a1fd
+  revision: a8de326f95875ef5fcd60b73425dd94d494be6fd
 - id: cto-os-skills
   url: https://github.com/rinaldofesta/cto-os-skills.git
   branch: main
@@ -39,15 +39,15 @@ sources:
 - id: diagram-design
   url: https://github.com/cathrynlavery/diagram-design.git
   branch: main
-  revision: 97d795138448f6a739a0cebc3d9beb37a42077f1
+  revision: d74d8c2d0c78a9e1efd43137f6a9a51182a8b5f0
 - id: docker-skills
   url: https://github.com/docker/skills.git
   branch: main
-  revision: 090ff3d39db5f8bc55d4e951c26218e7c95ea2d3
+  revision: caeee2024f7527d890a29dd1732b62a112f56d0e
 - id: googlechrome-modern-web-guidance
   url: https://github.com/GoogleChrome/modern-web-guidance.git
   branch: main
-  revision: 4dd968349e54ca45a05dd5c818fb035c9054b022
+  revision: 64a6d708f5a43f2cd3fde5d4d7db3905ba1bdf65
 - id: mahipal-cybersecurity-skills
   url: https://github.com/mukul975/Anthropic-Cybersecurity-Skills.git
   branch: main
@@ -55,11 +55,11 @@ sources:
 - id: mattpocock-skills
   url: https://github.com/mattpocock/skills.git
   branch: main
-  revision: 59db609eb1e18aaf59b63284d0e52255aff0c63c
+  revision: abeeaf95660ba9e8b7c753eb38f441ca707a8823
 - id: microsoft-playwright-cli
   url: https://github.com/microsoft/playwright-cli.git
   branch: main
-  revision: db2a0fad3a768319a16e3a2bb8078cf62e690b07
+  revision: c872a33cec77fa03c28fa7c6d1ad99d15d04ce42
 - id: oac
   url: https://github.com/darrenhinde/OpenAgentsControl.git
   branch: main
@@ -67,7 +67,7 @@ sources:
 - id: open-design
   url: https://github.com/nexu-io/open-design.git
   branch: main
-  revision: 325494e5a1e5858f7aa63bd71d7f326bdf911e7f
+  revision: 667f19464a920958c78cf1d6336b50e8ce46d747
 - id: refoundai-lenny-skills
   url: https://github.com/RefoundAI/lenny-skills.git
   branch: main
@@ -87,4 +87,4 @@ sources:
 - id: vercel-skills
   url: https://github.com/vercel-labs/skills.git
   branch: main
-  revision: 7a5e920bead4b1039a6d6df5d7e1163b7b09423a
+  revision: 57217cf86ba38148a57af9e90d14a4c049558330
