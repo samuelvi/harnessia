@@ -182,3 +182,7 @@ El proyecto y la documentación enlazados siguen siendo contenido de trabajo ext
 ## Licencia
 
 Copyright (c) 2026 Samuel Vicent. Harnessia Core se distribuye bajo la [Licencia Pública General de GNU, únicamente la versión 3](LICENSE) (`GPL-3.0-only`), sin garantía. El texto completo de la licencia está en `Core/LICENSE`. Las Sources de terceros conservan sus propias licencias; la licencia de Core no cambia la de su contenido.
+
+## Créditos
+
+Canción de inspiración: [Amnesia — Ibiza (1988)](https://www.youtube.com/watch?v=KSjLGw9CbGE&list=RDKSjLGw9CbGE)
