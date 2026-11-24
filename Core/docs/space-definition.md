@@ -38,7 +38,7 @@ Imported IDs must be unique. Valid custom skills under `capabilities/custom/skil
 
 The restricted `space-curator` agent uses the Space purpose and asks only for missing task, deliverable, technology, workflow and risk context. It shortlists skills from the index, reads only finalist `SKILL.md` bodies and follows the [MCP selection guide](mcp-guide.md). It proposes a minimal required set plus optional and rejected alternatives, including useful MCP servers not configured yet, with availability, usage triggers, authentication, cost and data/write risks. It must receive approval for the exact lists before editing. It cannot use shell, web, MCP tools or subagents, install or authenticate servers; OpenCode asks before every edit. MCP installation remains a separate approved maintenance operation.
 
-The opening prompt points to Core's [shared collaboration contract](../INSTRUCTIONS.md). Curation recommends Caveman chat and only applicable Matt Pocock skills/dependencies, respecting user-invoked-only triggers. It excludes Superpowers and default `caveman-compress`, including conflicting imported recommendations. These are authoring instructions, not new schema fields or automatic capability inheritance; an installed but deselected Source may still appear in the local catalog.
+The opening prompt points to the owning Instance's `INSTRUCTIONS.md` when present. Curation follows the Instance and Space's selection rules, including applicable dependencies and user-invoked-only triggers. These rules do not change the schema or automatically inherit capabilities; an installed but deselected Source may still appear in the local catalog.
 
 The assistant may change only `skills` and `mcp`; the Markdown body and every other frontmatter field must remain semantically unchanged. It does not prepare projections itself. Once OpenCode Mini exits with status zero, Harnessia validates the proposal and prepares both clients. No change is a successful cancellation and performs no preparation. A missing TTY or executable fails before launch. Interruption, non-zero exit, deletion, invalid Definition, invalid capability selection, a change outside `skills` and `mcp` or preparation failure restores the original `SPACE.md`; transactional projection generation preserves the previous client output.
 
@@ -58,38 +58,51 @@ Imported commands and custom commands under `capabilities/custom/commands/` are 
 
 ## Space directory
 
-A Space is an AI collaboration pseudo-project, not the real project itself. It keeps maintained rules, capability selection and generated client configuration together while optional links connect the external project and its supporting documentation.
+A Space is an AI collaboration environment, separate from the projects it supports. It keeps rules, capability selection and generated client configuration together. Optional links connect external projects and documentation.
 
 | Path | Contract |
 | --- | --- |
 | `SPACE.md` | Maintained Definition and capability selection. |
-| `INSTRUCTIONS.md` | Maintained Space instructions, loaded after Core and optional Instance instructions. |
+| `INSTRUCTIONS.md` | Maintained Space instructions, loaded after optional Instance instructions. |
 | `SOUL.md` | Required maintained regular file for explicit durable preferences about Space-specific collaboration style and judgment. It may be empty. |
 | `MEMORY.md` | Optional maintained memory, limited to 32 KiB and loaded after instructions. |
 | `INDEX.md` | Optional local navigation. It is not active context or capability selection. |
 | `capabilities/custom/` | Optional local skills, agents and commands. |
-| `work/<project-id>/` | Agent-maintained project workspace; its `docs/` has `sources/`, `wip/` and `deliverables/`. The shared contract owns the convention; preparation neither creates nor rewrites it. |
-| `docs/` | Optional Space-shared templates and setup evidence, not project-specific artifacts. |
-| `project`, `documentation` | Optional machine-local symlinks to the real project and its supporting documentation. These external working directories remain separate from the Space; Instance ignore policy excludes the links from a future repository. |
+| `work/<project-id>/` | Optional project workspace convention defined by the Instance or Space. Preparation neither creates nor rewrites it. |
+| `docs/` | Optional local documentation. Its layout is a local convention, not an engine requirement. |
+| Working links | Optional machine-local symlinks to external directories. Core recognizes `project` and `documentation`, plus the owning Instance's declared names. |
 | `opencode.jsonc`, `CLAUDE.md`, `.opencode/`, `.claude/` | Generated Client Projections; do not edit. |
 
 `make space-create INSTANCE=<id> SPACE=<space-id>` creates this minimum maintained structure inside an available registered Instance: a version 2 `SPACE.md` with an empty skill selection, an empty `SOUL.md` and a minimal `INSTRUCTIONS.md`. It then validates and prepares the new Space. The target must not exist; Harnessia never merges with or overwrites an existing path. A creation or preparation failure removes the newly created scaffold and leaves no partial Space.
 
 `make space-attach INSTANCE=<id> SPACE=<space-id>` initializes and prepares an existing regular directory that has no `SPACE.md`. Existing content and regular maintained `SOUL.md` or `INSTRUCTIONS.md` files are preserved; only the absent maintained files are added. Symlinked or non-regular maintained paths fail before any write. Preparation failure removes only files created by the attachment and restores the directory's prior state.
 
-Core, Instance and Space SOUL files and Core, Instance and Space `INSTRUCTIONS.md` files must be maintained regular files when required or present. A Space SOUL may start empty. Record only explicit durable user preferences about collaboration style and judgment, update it only at the user's explicit request and never infer preferences from ordinary conversation. `instance attach` atomically replaces a missing or symlinked Space SOUL with an empty regular file while preserving every existing regular Space SOUL.
+Core, Instance and Space SOUL files and Instance and Space `INSTRUCTIONS.md` files must be maintained regular files when required or present. A Space SOUL may start empty. Record only explicit durable user preferences about collaboration style and judgment, update it only at the user's explicit request and never infer preferences from ordinary conversation. `instance attach` atomically replaces a missing or symlinked Space SOUL with an empty regular file while preserving every existing regular Space SOUL.
 
 Optional `MEMORY.md` must be a maintained regular file. It cannot be symlinked, generated or external, and preparation never creates, summarizes or modifies it. Keep only verified durable facts, explicit decisions and the latest useful checkpoint; current code, tests and user direction take precedence. Replace stale entries and never store transcripts, secrets, credentials, personal data, absolute paths or speculation. Loading memory adds no MCP, process, network request or model call.
 
-The shared collaboration contract defines the project workspace convention, when the working agent maintains a checkpoint and its minimal contents. Keep one task record under the active project's `docs/wip/` (`work/<project-id>/docs/wip/` from the Space root); existing Space memory may retain a short current checkpoint with pointers, not a duplicate evidence log. Preparation itself performs no checkpoint update or project-directory creation. Nested project SOUL and instruction files are not automatically included in the effective context.
+The owning Instance or Space may define workspace and checkpoint rules. Preparation does not update checkpoints, create project workspaces or import nested project SOUL and instruction files into the effective context.
 
-Optional `project` and `documentation` links must resolve to directories outside the Space. Preparation validates only their boundaries and never inspects or activates AI files in linked content. Broken links fail validation; they are machine-local bindings and must be repaired after their targets move.
+### Working links
+
+To add names, put an optional, regular `WORKING_LINKS.yaml` at the Instance root:
+
+```yaml
+version: 1
+names:
+  - application
+  - handbook
+```
+
+The manifest accepts only `version` and `names`. List unique lowercase IDs made from letters, digits and single hyphens. Do not repeat `project` or `documentation` or use the reserved paths `capabilities`, `docs` or `work`. An empty list or an absent manifest leaves only the generic names.
+
+Each name applies to all Spaces in that Instance, but the actual link is optional in each Space. If present, it must be a symlink to an existing directory outside that Space. Preparation never opens the linked content. It validates the binding and emits Claude instruction exclusions for the link and its target. Other symlinks are not working links under this contract. Reattach the Instance to refresh the managed Git ignore block after changing the manifest, then prepare its Spaces to refresh client projections.
 
 ## Effective Space
 
-Preparation resolves one client-agnostic effective Space. Its active Markdown is ordered from lowest to highest priority: Core SOUL, optional Instance SOUL, Space SOUL, Core instructions, optional Instance instructions, Space instructions and optional Space memory. Client adapters consume the same ordered paths without changing maintained content.
+Preparation resolves one client-agnostic effective Space. Its active Markdown is ordered from lowest to highest priority: Core SOUL, optional Instance SOUL, Space SOUL, optional Instance instructions, Space instructions and optional Space memory. Client adapters consume the same ordered paths without changing maintained content.
 
-Later context specializes task and technical behavior. The shared contract forbids silent weakening of safety/approval rules or permission expansion through skills/memory; conflicts must be surfaced. The engine orders files but does not semantically adjudicate their prose or enforce an autonomous runtime. Agents and clients remain responsible for following instructions and actual runtime permissions.
+Later context specializes task and technical behavior. File order does not expand permissions or resolve semantic conflicts. Agents and clients remain responsible for following applicable instructions and runtime permissions.
 
 This inheritance is role-based, not a scan of every Markdown file. `INDEX.md` is navigation, `SPACE.md` is a Definition, and README or linked documentation is reference material. They never become active instructions merely because they exist at more than one level.
 
@@ -97,7 +110,7 @@ This inheritance is role-based, not a scan of every Markdown file. `INDEX.md` is
 
 The generated `opencode.jsonc` contains:
 
-1. Core SOUL, optional Instance SOUL, Space SOUL, Core instructions, optional Instance instructions, Space instructions, then optional Space memory;
+1. The effective context paths in the order above;
 2. relative Source catalog paths in imported-first, custom-last order;
 3. ordered skill permissions denying `*`, then allowing each effective skill ID;
 4. ordered integration policies denying `mcp:*`, then allowing each selected `mcp:<server-id>`.
@@ -106,7 +119,7 @@ Selected agents and commands are projected as relative symlinks under `.opencode
 
 ## Claude Code projection
 
-`CLAUDE.md` imports the effective instruction files in canonical order. `.claude/skills/` contains one relative directory link per effective skill. Generated settings enable strict sandbox behavior, deny MCP tools and exclude instruction discovery beneath linked `project` and `documentation` paths.
+`CLAUDE.md` imports the effective instruction files in canonical order. `.claude/skills/` contains one relative directory link per effective skill. Generated settings enable strict sandbox behavior, deny MCP tools and exclude instruction discovery beneath each recognized working link and its resolved target.
 
 Every Space receives an empty `.claude/harnessia-mcp.json`, even when `mcp` selects servers for OpenCode. Claude Code CLI and Desktop discover the instruction and settings projection automatically; the empty catalog is supplied explicitly for strict CLI startup. Generated permissions deny MCP tool calls, although inherited servers may still load. Strict CLI isolation uses `--setting-sources project --strict-mcp-config --mcp-config .claude/harnessia-mcp.json`. No dummy server or MCP tool schema is generated. Claude has no exact project skill allowlist, so personal and nested skills may remain visible. The Core plugin is not inherited when a Space is the primary directory. OpenCode agents and commands are not translated.
 

@@ -6,6 +6,7 @@ import unittest
 
 import yaml
 
+from app.__main__ import main
 from app.instances import register_instance
 from app.layout import CoreLayout
 from app.source_bootstrap import (
@@ -98,7 +99,6 @@ class SourceBootstrapTest(unittest.TestCase):
 
     def write_space(self) -> Path:
         (self.root / "SOUL.md").write_text("# Soul\n")
-        (self.root / "INSTRUCTIONS.md").write_text("# Shared instructions\n")
         (self.root / "HARNESSIA.md").write_text(
             "---\nversion: 1\nskills:\n"
             "  - source: core/example\n"
@@ -179,6 +179,25 @@ skills:
             git(instance / "sources/example", "rev-parse", "HEAD"),
             self.initial_revision,
         )
+
+    def test_scoped_clone_uses_only_core_and_the_selected_instance(self):
+        core = CoreLayout.at(self.root)
+        target = self.root / "selected"
+        (target / "spaces").mkdir(parents=True)
+        (target / "SOURCES.yaml").write_text(core.source_manifest.read_text())
+        register_instance(core, "Example-A", target)
+        register_instance(core, "Example-B", self.root / "missing")
+
+        self.assertEqual(
+            main(["sources-clone", "--instance", "Example-A"], directory=self.root),
+            0,
+        )
+        self.assertEqual(git(self.source, "rev-parse", "HEAD"), self.initial_revision)
+        self.assertEqual(
+            git(target / "sources/example", "rev-parse", "HEAD"), self.initial_revision
+        )
+        with self.assertRaisesRegex(HarnessiaError, "Example-B: missing"):
+            clone_sources(self.root)
 
     def test_clone_rejects_existing_drift_without_overwriting_it(self):
         clone_sources(self.root)

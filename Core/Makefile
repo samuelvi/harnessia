@@ -45,7 +45,7 @@ check:
 	@if [ -n "$(INSTANCE)" ]; then $(ENGINE) check --instance "$(INSTANCE)"; else $(ENGINE) check; fi
 
 sources-clone:
-	@$(ENGINE) sources-clone
+	@if [ -n "$(INSTANCE)" ]; then $(ENGINE) sources-clone --instance "$(INSTANCE)"; else $(ENGINE) sources-clone; fi
 
 sources-check:
 	@$(ENGINE) sources-check

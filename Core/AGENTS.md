@@ -1,11 +1,11 @@
 # Harnessia Repository Instructions
 
-These rules apply when maintaining Harnessia itself, including its engine, definitions, shared context, projections and repository documentation. They do not add requirements to ordinary work performed inside a Space's linked `project` or `documentation` content.
+These rules apply when maintaining Harnessia itself, including its engine, definitions, shared context, projections and repository documentation. They do not govern ordinary work inside a Space or its linked content.
 
 ## Maintenance workflow
 
 - The Git repository root is the parent of `Core/`. All project files, including the engine, Makefile, operating guides and license, live in Core. Only `Core/` and the root `.gitignore` are versioned. The root policy only defines that publication boundary; `Core/.gitignore` owns exclusions for local configuration, runtime state, installed Sources, generated content, credentials, caches and private documentation. Do not add local Instances or other sibling content.
-- Start with `SOUL.md`, `README.md` and `docs/INDEX.md`. Follow the task contract and capability/authority rules in `INSTRUCTIONS.md` for maintenance too; this file controls repository layout and maintenance-specific artifact locations.
+- Start with `SOUL.md`, `README.md` and `docs/INDEX.md`. This file governs Core maintenance; an Instance's `INSTRUCTIONS.md` governs only that Instance's Spaces.
 - Use `ask-matt` when the appropriate selected Matt Pocock flow is unclear and the user requests routing. For agent-facing instructions, apply selected `writing-for-agents`. Core selects `caveman` for concise chat; its persisted-document and approval exceptions still apply.
 - Keep private working material in Core `docs/sources/`, `docs/wip/` and `docs/deliverables/`, all excluded by `Core/.gitignore`. Plans are independent files under `docs/wip/plans/`; backups belong to `docs/wip/backups/`. Do not overwrite historical material or force-add these ignored directories. Maintained product references elsewhere in `Core/docs/` remain versioned. Do not offer or publish Harnessia material to Atlassian Artifacts unless the user explicitly requests it.
 - Keep every repository used for Harnessia maintenance under `sources/<source-id>/` and declare reproducible repositories in Core `SOURCES.yaml`. A Space may select it only through `core/<source-id>`.

@@ -22,8 +22,8 @@ class SetupTemplateTest(unittest.TestCase):
                 {
                     "PATH": f"{directory}:{environment['PATH']}",
                     "FAKE_MARKER": str(marker),
-                    "INSTANCE": "Work",
-                    "INSTANCE_PATH": "/Users/me/Harnessia/Work",
+                    "INSTANCE": "Example",
+                    "INSTANCE_PATH": "/absolute/path/to/Example",
                     "SPACE": "atlas",
                 }
             )
@@ -43,7 +43,7 @@ class SetupTemplateTest(unittest.TestCase):
     def test_attaches_existing_directory_that_is_not_an_initialized_space(self):
         with TemporaryDirectory() as temporary:
             directory = Path(temporary)
-            instance = directory / "Work"
+            instance = directory / "Example"
             space = instance / "spaces/example-space"
             space.mkdir(parents=True)
             log = directory / "make-calls"
@@ -55,7 +55,7 @@ class SetupTemplateTest(unittest.TestCase):
                 {
                     "PATH": f"{directory}:{environment['PATH']}",
                     "FAKE_LOG": str(log),
-                    "INSTANCE": "Work",
+                    "INSTANCE": "Example",
                     "INSTANCE_PATH": str(instance),
                     "SPACE": "example-space",
                 }
@@ -74,17 +74,19 @@ class SetupTemplateTest(unittest.TestCase):
         self.assertEqual(
             calls,
             [
-                f"instance-attach INSTANCE=Work INSTANCE_PATH={instance}",
-                "sources-clone",
-                "space-attach INSTANCE=Work SPACE=example-space",
-                "space-configure INSTANCE=Work SPACE=example-space",
-                "check INSTANCE=Work",
+                f"instance-attach INSTANCE=Example INSTANCE_PATH={instance}",
+                "sources-clone INSTANCE=Example",
+                "space-attach INSTANCE=Example SPACE=example-space",
+                "space-configure INSTANCE=Example SPACE=example-space",
+                "check INSTANCE=Example",
             ],
         )
 
-    def test_uses_atlas_as_the_demo_space_name(self):
+    def test_neutral_names_are_template_defaults(self):
         template = TEMPLATE.read_text()
 
+        self.assertIn('INSTANCE="${INSTANCE:-Default}"', template)
+        self.assertIn('INSTANCE_PATH="${INSTANCE_PATH:-}"', template)
         self.assertIn('SPACE="${SPACE:-atlas}"', template)
 
     def test_copy_in_core_docs_wip_runs_make_from_core(self):
@@ -129,7 +131,7 @@ class SetupTemplateTest(unittest.TestCase):
                 log.read_text().splitlines(),
                 [
                     f"{core} instance-attach INSTANCE=Example INSTANCE_PATH={instance}",
-                    f"{core} sources-clone",
+                    f"{core} sources-clone INSTANCE=Example",
                     f"{core} space-configure INSTANCE=Example SPACE=atlas",
                     f"{core} check INSTANCE=Example",
                 ],

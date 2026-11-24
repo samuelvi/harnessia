@@ -1,18 +1,11 @@
 import os
 from pathlib import Path
 
+from .layout import InstanceLayout
 from .space import HarnessiaError, SpaceDefinition
 
 
 MAX_MEMORY_BYTES = 32 * 1024
-
-
-def _is_within(path: Path, parent: Path) -> bool:
-    try:
-        path.relative_to(parent)
-        return True
-    except ValueError:
-        return False
 
 
 def _optional_regular(path: Path, label: str) -> bool:
@@ -27,23 +20,9 @@ def _relative(path: Path, directory: Path) -> Path:
     return Path(os.path.relpath(path, directory))
 
 
-def _validate_working_links(definition: SpaceDefinition) -> None:
-    for name in ("project", "documentation"):
-        link = definition.directory / name
-        if not link.exists() and not link.is_symlink():
-            continue
-        if not link.is_symlink():
-            raise HarnessiaError(f"{link}: {name} must be a symbolic link")
-        try:
-            target = link.resolve(strict=True)
-        except FileNotFoundError as error:
-            raise HarnessiaError(f"{link}: {name} link is broken") from error
-        if not target.is_dir():
-            raise HarnessiaError(f"{link}: {name} must resolve to a directory")
-        if _is_within(target, definition.directory):
-            raise HarnessiaError(
-                f"{link}: {name} must resolve outside the Space directory"
-            )
+def instance_instructions_path(instance: InstanceLayout) -> Path | None:
+    path = instance.directory / "INSTRUCTIONS.md"
+    return path if _optional_regular(path, "Instance INSTRUCTIONS.md") else None
 
 
 def resolve_context_paths(definition: SpaceDefinition) -> tuple[Path, ...]:
@@ -60,13 +39,6 @@ def resolve_context_paths(definition: SpaceDefinition) -> tuple[Path, ...]:
             f"{space_soul}: Space SOUL.md must be a maintained regular file"
         )
 
-    core_instructions = definition.core.directory / "INSTRUCTIONS.md"
-    if not core_instructions.is_file() or core_instructions.is_symlink():
-        raise HarnessiaError(
-            f"{core_instructions}: shared INSTRUCTIONS.md must be a maintained "
-            "regular file"
-        )
-
     space_instructions = definition.directory / "INSTRUCTIONS.md"
     if not space_instructions.is_file():
         raise HarnessiaError(f"{space_instructions}: INSTRUCTIONS.md is required")
@@ -80,8 +52,6 @@ def resolve_context_paths(definition: SpaceDefinition) -> tuple[Path, ...]:
         if memory.stat().st_size > MAX_MEMORY_BYTES:
             raise HarnessiaError(f"{memory}: MEMORY.md must not exceed 32 KiB")
 
-    _validate_working_links(definition)
-
     ordered = [_relative(core_soul, definition.directory)]
 
     instance_soul = definition.instance.directory / "SOUL.md"
@@ -90,10 +60,8 @@ def resolve_context_paths(definition: SpaceDefinition) -> tuple[Path, ...]:
 
     ordered.append(Path("SOUL.md"))
 
-    ordered.append(_relative(core_instructions, definition.directory))
-
-    instance_instructions = definition.instance.directory / "INSTRUCTIONS.md"
-    if _optional_regular(instance_instructions, "Instance INSTRUCTIONS.md"):
+    instance_instructions = instance_instructions_path(definition.instance)
+    if instance_instructions is not None:
         ordered.append(_relative(instance_instructions, definition.directory))
 
     ordered.append(Path("INSTRUCTIONS.md"))

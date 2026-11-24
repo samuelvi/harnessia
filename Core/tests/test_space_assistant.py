@@ -36,8 +36,8 @@ class SpaceAssistantTest(unittest.TestCase):
         self.space.mkdir(parents=True)
         self.instance.sources.mkdir()
         (self.core.directory / "SOUL.md").write_text("# Core soul\n")
-        (self.core.directory / "INSTRUCTIONS.md").write_text(
-            "# Core instructions\n"
+        (self.instance.directory / "INSTRUCTIONS.md").write_text(
+            "# Instance instructions\n"
         )
         (self.core.directory / "SOURCES.yaml").write_text(
             "version: 2\nsources: []\n"
@@ -111,9 +111,8 @@ class SpaceAssistantTest(unittest.TestCase):
         self.assertIn("MCP", prompt)
         self.assertIn("mcp-inventory.json", prompt)
         self.assertIn("mcp-guide.md", prompt)
-        self.assertIn(str(self.core.directory / "INSTRUCTIONS.md"), prompt)
-        self.assertIn("purpose-appropriate Matt Pocock skills", prompt)
-        self.assertIn("Exclude Superpowers and default caveman-compress", prompt)
+        self.assertIn(str(self.instance.directory / "INSTRUCTIONS.md"), prompt)
+        self.assertNotIn(str(self.core.directory / "INSTRUCTIONS.md"), prompt)
         inventory = json.loads((result.catalog.parent / "mcp-inventory.json").read_text())
         self.assertEqual(inventory["servers"], [{"id": "playwright", "status": "connected"}])
 
@@ -143,6 +142,21 @@ class SpaceAssistantTest(unittest.TestCase):
         inventory = json.loads((result.catalog.parent / "mcp-inventory.json").read_text())
         self.assertFalse(inventory["available"])
         self.assertFalse(result.changed)
+
+    def test_curates_an_instance_without_shared_instructions(self):
+        (self.instance.directory / "INSTRUCTIONS.md").unlink()
+        with patch("app.space_assistant.subprocess.run") as run:
+            run.return_value.returncode = 0
+            run.return_value.stdout = "{}"
+            configure_space(
+                self.core,
+                self.instance,
+                "atlas",
+                executable=self.fake_opencode(),
+                require_tty=False,
+            )
+        prompt = run.call_args.args[0][-1]
+        self.assertNotIn("shared collaboration policy", prompt)
 
     def test_invalid_mcp_or_unrelated_fields_restore_definition_and_projections(self):
         prepare_instance(self.core, self.instance, "atlas")

@@ -72,7 +72,8 @@ def main(argv: list[str] | None = None, directory: Path | None = None) -> int:
     configure_space_parser = space_subparsers.add_parser("configure")
     configure_space_parser.add_argument("instance")
     configure_space_parser.add_argument("id")
-    subparsers.add_parser("sources-clone")
+    clone_parser = subparsers.add_parser("sources-clone")
+    clone_parser.add_argument("--instance")
     subparsers.add_parser("sources-check")
     subparsers.add_parser("sources-status")
     subparsers.add_parser("sources-fetch")
@@ -188,7 +189,7 @@ def main(argv: list[str] | None = None, directory: Path | None = None) -> int:
                     )
                 return 0
         if arguments.command == "sources-clone":
-            print(render_clone_result(clone_sources(directory)))
+            print(render_clone_result(clone_sources(directory, instance_id=arguments.instance)))
             return 0
         if arguments.command == "sources-check":
             print(render_check_result(check_sources(directory)))

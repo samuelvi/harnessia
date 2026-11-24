@@ -14,6 +14,7 @@ from app.context import resolve_context_paths
 from app.effective import resolve_effective_space
 from app.layout import CoreLayout, InstanceLayout
 from app.space import load_instance_space
+from app.working_links import resolve_working_links
 
 
 def write_skill(directory: Path, name: str) -> None:
@@ -34,7 +35,6 @@ class ProjectionTest(unittest.TestCase):
         self.source = self.core.sources / "example"
         write_skill(self.source / "skills/example-skill", "example-skill")
         (self.root / "SOUL.md").write_text("# Shared soul\n")
-        (self.root / "INSTRUCTIONS.md").write_text("# Shared instructions\n")
         (self.space / "SOUL.md").write_text("")
         (self.space / "INSTRUCTIONS.md").write_text("# Instructions\n")
         (self.space / "SPACE.md").write_text(
@@ -70,7 +70,6 @@ skills:
         self.assertEqual(config["instructions"], [
             "../../../SOUL.md",
             "SOUL.md",
-            "../../../INSTRUCTIONS.md",
             "INSTRUCTIONS.md",
         ])
         self.assertEqual(config["skills"], ["../../../sources/example/skills"])
@@ -93,19 +92,27 @@ skills:
             [
                 "../../../SOUL.md",
                 "SOUL.md",
-                "../../../INSTRUCTIONS.md",
                 "INSTRUCTIONS.md",
                 "MEMORY.md",
             ],
         )
 
-    def test_requires_shared_instructions(self):
-        (self.root / "INSTRUCTIONS.md").unlink()
+    def test_ignores_legacy_core_instructions(self):
+        (self.root / "INSTRUCTIONS.md").write_text("# Legacy Core instructions\n")
+        self.assertEqual(
+            self.effective_space().context_paths,
+            (Path("../../../SOUL.md"), Path("SOUL.md"), Path("INSTRUCTIONS.md")),
+        )
+
+    def test_rejects_symlinked_instance_instructions(self):
+        outside = self.external / "instructions.md"
+        outside.write_text("external")
+        (self.instance.directory / "INSTRUCTIONS.md").symlink_to(outside)
         definition = load_instance_space(self.core, self.instance, "example-space")
 
         with self.assertRaisesRegex(
             HarnessiaError,
-            "shared INSTRUCTIONS.md must be a maintained regular file",
+            "Instance INSTRUCTIONS.md must be a maintained regular file",
         ):
             resolve_context_paths(definition)
 
@@ -183,7 +190,29 @@ skills:
         definition = load_instance_space(self.core, self.instance, "example-space")
 
         with self.assertRaisesRegex(HarnessiaError, "project must be a symbolic link"):
-            resolve_context_paths(definition)
+            resolve_working_links(definition)
+
+    def test_checks_named_working_links_without_checking_internal_docs_alias(self):
+        definition = load_instance_space(self.core, self.instance, "example-space")
+        (self.instance.directory / "WORKING_LINKS.yaml").write_text(
+            "version: 1\nnames: [application, handbook]\n"
+        )
+        (self.space / "docs").symlink_to("local-docs")
+        (self.space / "local-docs").mkdir()
+        resolve_working_links(definition)
+
+        for name in ("application", "handbook"):
+            link = self.space / name
+            for target, message in (
+                ("missing", "link is broken"),
+                ("local-docs", "must resolve outside"),
+                ("SPACE.md", "must resolve to a directory"),
+            ):
+                with self.subTest(name=name, target=target):
+                    link.symlink_to(target)
+                    with self.assertRaisesRegex(HarnessiaError, f"{name} {message}"):
+                        resolve_working_links(definition)
+                    link.unlink()
 
     def test_protects_manual_opencode_configuration(self):
         target = self.space / "opencode.jsonc"

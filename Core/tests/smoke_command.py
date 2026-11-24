@@ -37,7 +37,6 @@ def build_fixture(root: Path) -> Path:
     space.mkdir(parents=True)
     (source / "commands").mkdir(parents=True)
     (root / "SOUL.md").write_text("# Soul\n")
-    (root / "INSTRUCTIONS.md").write_text("# Shared instructions\n")
     (space / "SOUL.md").write_text("")
     (space / "INSTRUCTIONS.md").write_text("# Instructions\n")
     (source / "commands/echo.md").write_text(

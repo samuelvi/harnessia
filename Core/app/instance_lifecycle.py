@@ -10,6 +10,7 @@ from .instances import (
 )
 from .layout import INSTANCE_ID, CoreLayout, InstanceLayout
 from .space import HarnessiaError, discover_instance_space_ids
+from .working_links import DEFAULT_WORKING_LINKS, load_working_link_names
 
 
 INSTANCE_IGNORE_RULES = """# Harnessia machine-local state
@@ -17,8 +18,7 @@ INSTANCE_IGNORE_RULES = """# Harnessia machine-local state
 sources/
 
 # Machine-local Space bindings
-spaces/*/project
-spaces/*/documentation
+{working_link_rules}
 
 # Generated client projections
 spaces/*/opencode.jsonc
@@ -31,9 +31,12 @@ spaces/*/.opencode/
 """
 INSTANCE_IGNORE_START = "# BEGIN Harnessia managed ignore rules"
 INSTANCE_IGNORE_END = "# END Harnessia managed ignore rules"
-INSTANCE_IGNORE = (
-    f"{INSTANCE_IGNORE_START}\n{INSTANCE_IGNORE_RULES}{INSTANCE_IGNORE_END}\n"
-)
+
+
+def _ignore_rules(names: tuple[str, ...]) -> str:
+    return INSTANCE_IGNORE_RULES.format(
+        working_link_rules="\n".join(f"spaces/*/{name}" for name in names),
+    )
 
 
 @dataclass(frozen=True)
@@ -65,7 +68,9 @@ def _validate_instance_directory(layout: InstanceLayout) -> None:
         )
 
 
-def _managed_ignore(existing: str) -> str:
+def _managed_ignore(existing: str, names: tuple[str, ...]) -> str:
+    rules = _ignore_rules(names)
+    managed = f"{INSTANCE_IGNORE_START}\n{rules}{INSTANCE_IGNORE_END}\n"
     starts = existing.count(INSTANCE_IGNORE_START)
     ends = existing.count(INSTANCE_IGNORE_END)
     if starts != ends or starts > 1:
@@ -78,13 +83,11 @@ def _managed_ignore(existing: str) -> str:
         end += len(INSTANCE_IGNORE_END)
         if end < len(existing) and existing[end] == "\n":
             end += 1
-        return existing[:start] + INSTANCE_IGNORE + existing[end:]
-    if existing == INSTANCE_IGNORE_RULES:
-        return INSTANCE_IGNORE
-    if not existing:
-        return INSTANCE_IGNORE
+        return existing[:start] + managed + existing[end:]
+    if not existing or existing == _ignore_rules(DEFAULT_WORKING_LINKS):
+        return managed
     separator = "" if existing.endswith("\n\n") else "\n" if existing.endswith("\n") else "\n\n"
-    return existing + separator + INSTANCE_IGNORE
+    return existing + separator + managed
 
 
 def _replace_with_empty_file(path: Path) -> None:
@@ -135,8 +138,9 @@ def attach_instance(
         ignore_content = ignore.read_text() if ignore.exists() else ""
     except OSError as error:
         raise HarnessiaError(f"{ignore}: cannot read Instance ignore policy: {error}") from error
+    names = load_working_link_names(layout)
     try:
-        updated_ignore = _managed_ignore(ignore_content)
+        updated_ignore = _managed_ignore(ignore_content, names)
     except HarnessiaError as error:
         raise HarnessiaError(f"{ignore}: {error}") from error
 
@@ -178,7 +182,6 @@ def create_instance(
         (path / "spaces").mkdir()
         (path / "sources").mkdir()
         (path / "SOURCES.yaml").write_text("version: 2\nsources: []\n")
-        (path / ".gitignore").write_text(INSTANCE_IGNORE)
         return attach_instance(core, instance_id, path)
     except Exception:
         # The target was absent before this operation and contains only our scaffold.

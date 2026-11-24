@@ -226,11 +226,11 @@ interruptions, completion logging runs inside that transaction, and post-commit
 backup cleanup is best-effort. Regression tests cover those paths and cleanup
 failure/interruption without reverting an already committed selection.
 
-`make verify` passed 161 tests and read-only validation of Core, the registered Work
-Instance and fourteen Spaces. Explicit read-only validation of unregistered Personal
+`make verify` passed 161 tests and read-only validation of Core, one registered
+Instance and fourteen Spaces. Explicit read-only validation of the unregistered Instance
 passed for both Spaces without changing registration. Live OpenCode discovery
 confirmed the updated curator's default-deny permissions, edit approval and question
-access. Local Work/Personal operating guides were updated outside the publication
+access. Local Instance operating guides were updated outside the publication
 boundary; their capability selections were preserved.
 
 ## Shared project workspaces and web guidance — 2026-11-20
@@ -243,8 +243,8 @@ evidence. Core maintenance keeps its repository-owned documentation layout. This
 an inherited working convention, not a schema addition, nested Space, automatic
 context loader or engine-driven content migration.
 
-An approved local maintenance pass reviewed fifteen Work and five unregistered
-Personal Spaces. It moved 29 local paths into 21 project workspaces, verified all
+An approved local maintenance pass reviewed fifteen registered and five unregistered
+Spaces. It moved 29 local paths into 21 project workspaces, verified all
 8,950 files remained present, and changed only twelve live text files within those
 moved trees. Originals, binaries, archived evidence and backups retained their
 bytes. Active navigation and local artifact helpers were repaired; four legacy
@@ -270,14 +270,43 @@ repositories fast-forwarded and their manifest pins were reconciled. Nine were
 already current. BMAD remains at its previous reviewed revision: the new tree moves
 both selected skills and changes the analyst's workflow dependencies, requiring a
 separate capability migration rather than silent selection expansion. Instance
-Sources and manifests were not updated, and Personal was not registered.
+Sources and manifests were not updated, and registration did not change.
 
 All 162 engine tests pass, including a new regression confirming repeated
 preparation preserves project workspaces without importing nested context. Core and
 all twenty local Spaces validated; both client projections were regenerated, and
 the twenty Space projection pairs match their rendered Definitions and inherit
 Core context. All twenty-two pinned Core Sources match clean clones. The aggregate
-`make verify` passes tests but remains blocked by a pre-existing Work Source origin
-mismatch (`bitbucket.org` in its manifest versus `ssh.bitbucket.org` in the clone);
+`make verify` passed tests but encountered a pre-existing Instance Source origin
+mismatch;
 that unrelated binding was preserved. These are configuration and filesystem checks,
 not proof of interactive client activation, browser behavior or product deployment.
+
+## Instance-owned instructions and named working links — 2026-11-24
+
+Operational context moved from Core to the owning Instance. Space projections and
+the curator now use the optional Instance `INSTRUCTIONS.md`; Core still provides
+its shared SOUL and maintains its own repository rules separately.
+
+An initial implementation recognized two additional names globally so they
+received the same directory validation, Claude instruction exclusions and Git
+ignore rules as the generic working links. Twelve local bindings were migrated
+across eight Spaces, including repair of a broken repository link. No linked
+content was moved. The design below removes the globally fixed names.
+
+All 166 tests passed. Both client projections were regenerated and checked in 21
+local Spaces without changing registration. All 17 updated Markdown links resolve.
+`make verify` remained blocked by the previously recorded Source origin mismatch.
+
+## Instance-neutral working links and setup — 2026-11-24
+
+The owning Instance can now declare additional link names in its optional
+`WORKING_LINKS.yaml`. Core uses generic validation, projections and Git ignore
+rules; it does not carry the local alias names. Existing links and destinations
+were left in place. The setup template defaults to the name `Default` without
+assigning it a path or reserving it. Setup clones Sources only for Core and the
+chosen Instance; the unscoped command still covers all registered owners.
+
+All 170 tests passed, including Core without Instances, independent link
+manifests and scoped cloning with an unrelated missing Instance. Read-only
+validation passed for Core and all 21 local Spaces without changing registration.

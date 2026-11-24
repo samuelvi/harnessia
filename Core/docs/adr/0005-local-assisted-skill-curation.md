@@ -1,20 +1,20 @@
 # ADR 0005: Local Assisted Skill Curation
 
-Status: accepted on 2026-10-28.
+Status: accepted on 2026-10-28; the original skills-only scope was extended by [ADR 0006](0006-purpose-specific-mcp-curation.md).
 
 ## Context
 
 A Space selects portable skills in client-agnostic `SPACE.md`, but Core and an Instance can expose thousands of candidates. A deterministic form can validate references but cannot judge which capabilities best fit a Space's purpose, while loading every skill body into one model context would be slow, costly and imprecise. Embedding a model SDK would also couple Harnessia to another runtime and duplicate the authentication and interaction already available in OpenCode.
 
-The selection must remain reviewable and safe: no external Source search, no visibility into unrelated Instances, no autonomous edit, no model-driven preparation and no loss of the previous Definition or projections when the session is cancelled or produces invalid output.
+The selection must remain reviewable: no external Source search or unrelated Instance candidates, no autonomous edit, no model-driven preparation and no loss of prior projections on cancellation or invalid output. Catalog scope and agent instructions do not form a filesystem sandbox.
 
 ## Decision
 
 Harnessia exposes `make space-configure INSTANCE=<id> SPACE=<space-id>`. It builds a temporary JSONL index from valid skills in Core and the target Instance only, then opens OpenCode Mini with the maintained primary agent `space-curator`. The index carries enough metadata to shortlist candidates without loading every skill body; the agent reads only finalist definitions.
 
-The agent asks for missing context, recommends the smallest sufficient set, separates required, optional and rejected candidates, and waits for explicit approval of the exact references. Its permissions allow local reading and search, ask before every edit, and deny shell, web and subagent use. Its instructions limit the edit to the target `SPACE.md` `skills` field.
+The agent asks for missing context, recommends the smallest sufficient set, separates required, optional and rejected candidates, and waits for explicit approval of the exact references. Its permissions allow local reading and search, ask before every edit, and deny shell, web and subagent use. The original edit scope was only `skills`; [ADR 0006](0006-purpose-specific-mcp-curation.md) adds `mcp`.
 
-Harnessia remains the authority after the session. It records the attempted Definition, rejects changes outside `skills`, performs normal validation and preparation only after a zero exit, and restores the snapshot after interruption, client failure, invalid output or preparation failure. OpenCode and Claude projections continue to derive from the approved agnostic Definition through the existing adapters.
+Harnessia remains the authority after the session. It records the attempted Definition, rejects changes outside the approved fields, performs normal validation and preparation only after a zero exit, and restores the snapshot after interruption, client failure, invalid output or preparation failure. Both projections continue to derive from the approved Definition.
 
 ## Consequences
 

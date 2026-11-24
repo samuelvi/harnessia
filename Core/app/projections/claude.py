@@ -44,11 +44,8 @@ def render_claude_instructions(space: EffectiveSpace) -> str:
 
 def render_claude_settings(space: EffectiveSpace) -> dict[str, object]:
     exclusions: list[str] = []
-    for name in ("project", "documentation"):
-        link = space.definition.directory / name
-        if not _present(link):
-            continue
-        for root in (link.absolute(), link.resolve(strict=True)):
+    for link in space.working_links:
+        for root in (link.path.absolute(), link.target):
             pattern = f"{root.as_posix()}/**"
             if pattern not in exclusions:
                 exclusions.append(pattern)

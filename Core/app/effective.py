@@ -13,12 +13,14 @@ from .layout import CoreLayout
 from .core import CoreDefinition, load_core_definition
 from .space import SpaceDefinition
 from .source_resolver import SourceResolver
+from .working_links import WorkingLink, resolve_working_links
 
 
 @dataclass(frozen=True)
 class EffectiveSpace:
     definition: SpaceDefinition
     context_paths: tuple[Path, ...]
+    working_links: tuple[WorkingLink, ...]
     skills: SkillInventory
     agents: AgentInventory
     commands: CommandInventory
@@ -35,6 +37,7 @@ def resolve_effective_space(definition: SpaceDefinition) -> EffectiveSpace:
     return EffectiveSpace(
         definition=definition,
         context_paths=context_paths,
+        working_links=resolve_working_links(definition),
         skills=resolve_skills(definition),
         agents=resolve_agents(definition),
         commands=resolve_commands(definition),

@@ -24,7 +24,6 @@ class InstanceLayoutTest(unittest.TestCase):
         self.space.mkdir()
 
         (self.core.directory / "SOUL.md").write_text("# Core soul\n")
-        (self.core.directory / "INSTRUCTIONS.md").write_text("# Core instructions\n")
         (self.instance.directory / "SOUL.md").write_text("# Instance soul\n")
         (self.instance.directory / "INSTRUCTIONS.md").write_text(
             "# Instance instructions\n"
@@ -76,11 +75,6 @@ skills:
             ).as_posix(),
             "../../SOUL.md",
             "SOUL.md",
-            Path(
-                os.path.relpath(
-                    self.core.directory / "INSTRUCTIONS.md", self.space
-                )
-            ).as_posix(),
             "../../INSTRUCTIONS.md",
             "INSTRUCTIONS.md",
             "MEMORY.md",
@@ -118,11 +112,6 @@ skills:
                 ),
                 Path("../../SOUL.md"),
                 Path("SOUL.md"),
-                Path(
-                    os.path.relpath(
-                        self.core.directory / "INSTRUCTIONS.md", self.space
-                    )
-                ),
                 Path("../../INSTRUCTIONS.md"),
                 Path("INSTRUCTIONS.md"),
                 Path("MEMORY.md"),
@@ -213,7 +202,7 @@ skills:
         marker.write_text("keep\n")
         soul = space / "SOUL.md"
         soul.write_text("# Existing Space soul\n")
-        (self.core.directory / "INSTRUCTIONS.md").unlink()
+        (self.core.directory / "SOUL.md").unlink()
 
         result = main(
             ["space", "attach", "Work", "attached-space"],
@@ -248,7 +237,7 @@ skills:
 
     def test_cli_removes_new_space_when_preparation_fails(self):
         register_instance(self.core, "Work", self.instance.directory)
-        (self.core.directory / "INSTRUCTIONS.md").unlink()
+        (self.core.directory / "SOUL.md").unlink()
 
         result = main(
             ["space", "create", "Work", "atlas"],

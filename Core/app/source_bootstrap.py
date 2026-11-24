@@ -9,7 +9,7 @@ from uuid import uuid4
 import yaml
 
 from .check import check_all
-from .instances import consumer_instance_layouts
+from .instances import consumer_instance_layouts, registered_instance
 from .layout import CoreLayout, InstanceLayout
 from .prepare import prepare_all
 from .core import CORE_CONSUMER
@@ -298,9 +298,18 @@ def _raise_errors(title: str, errors: list[str]) -> None:
         raise HarnessiaError(title + ":\n" + "\n".join(errors))
 
 
-def clone_sources(root: Path) -> CloneResult:
+def clone_sources(root: Path, *, instance_id: str | None = None) -> CloneResult:
     root = root.resolve()
-    specs = load_source_manifests(CoreLayout.at(root))
+    core = CoreLayout.at(root)
+    if instance_id is None:
+        specs = load_source_manifests(core)
+    else:
+        instance = registered_instance(core, instance_id)
+        if instance.state != "available":
+            raise HarnessiaError(
+                f"Instance '{instance.id}' is {instance.state}: {instance.path}"
+            )
+        specs = load_source_manifest(root) + load_instance_source_manifest(instance.layout)
     missing = []
     current = []
     errors = []

@@ -25,7 +25,6 @@ class PrepareTest(unittest.TestCase):
         self.root = Path(self.temp.name).resolve() / "Core"
         self.root.mkdir()
         (self.root / "SOUL.md").write_text("# Soul\n")
-        (self.root / "INSTRUCTIONS.md").write_text("# Shared instructions\n")
         self.core = CoreLayout.at(self.root)
         self.instance = InstanceLayout.at("work", self.root / "instance")
         self.space = self.instance.spaces / "example-space"
@@ -66,7 +65,6 @@ skills:
             [
                 "@../../../SOUL.md",
                 "@SOUL.md",
-                "@../../../INSTRUCTIONS.md",
                 "@INSTRUCTIONS.md",
             ],
         )
@@ -106,6 +104,25 @@ skills:
         )
         self.assertEqual(len(logs), 1)
         self.assertIn("WARNING Preparation stopped", logs[0].read_text())
+
+    def test_claude_excludes_named_links_and_their_resolved_targets(self):
+        (self.instance.directory / "WORKING_LINKS.yaml").write_text(
+            "version: 1\nnames: [application, handbook]\n"
+        )
+        targets = []
+        for name in ("application", "handbook"):
+            target = self.root / name
+            target.mkdir()
+            (target / "CLAUDE.md").write_text("External instructions\n")
+            (self.space / name).symlink_to(target)
+            targets.extend([self.space / name, target])
+
+        prepare_instance(self.core, self.instance, "example-space")
+
+        settings = json.loads((self.space / ".claude/settings.json").read_text())
+        self.assertEqual(
+            settings["claudeMdExcludes"], [f"{root}/**" for root in targets]
+        )
 
     def test_project_workspaces_are_preserved_without_nested_context_loading(self):
         project = self.space / "work" / "chef-calendar"

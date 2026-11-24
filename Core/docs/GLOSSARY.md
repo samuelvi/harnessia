@@ -11,7 +11,7 @@ _Avoid_: Core when referring to the whole system
 **Local Working Material** — Private inputs, reviewed local outputs and work in progress under `Core/docs/sources/`, `Core/docs/deliverables/` and `Core/docs/wip/`. Those three subdirectories are ignored, while maintained product references elsewhere in `Core/docs/` remain versioned.
 _Avoid_: Core documentation, capability Sources
 
-**Instance** — A local container explicitly registered with Core that contributes optional context and contains purpose-specific Spaces. Its registered name is case-sensitive and preserves capitalization; Work and Customer-A are examples, not fixed engine concepts or included workspaces.
+**Instance** — A local container for related Spaces, Sources and optional shared context or configuration. Normal CLI discovery requires explicit registration with Core. Its registered name is case-sensitive; no name has special meaning in the engine.
 _Avoid_: Profile, Space
 
 **Source** — A capability-providing repository or maintained directory owned by Core or one Instance. Definitions identify it independently from its physical checkout path.
@@ -26,14 +26,16 @@ _Avoid_: Source registry, capability selection
 **Capability** — A reusable AI asset referenced at its original Source location. Harnessia supports portable Agent Skills and OpenCode-native agents and commands.
 _Avoid_: Copied asset, generated capability
 
-**Space** — A purpose-specific AI collaboration pseudo-project inside one Instance. It defines the maintained rules and Capabilities for working with a real project and supporting documentation, which may be linked while remaining external working content.
+**Space** — A purpose-specific AI collaboration environment inside one Instance. It defines rules and Capabilities separately from the projects and documentation it supports. Open the Space directly in the AI client.
 _Avoid_: Real project, generated workspace, profile
 
 **Space Definition** — The maintained `SPACE.md` inside a Space. Its YAML frontmatter is the sole client-agnostic capability selection.
 _Avoid_: `INDEX.md`, client configuration
 
-**Project Workspace** — One bounded project or initiative within a Space, also called a pseudo-project in task discussions. Its working root is `work/<project-id>/`, containing `docs/sources/`, `docs/wip/` and `docs/deliverables/`. It may contain local application code or coordinate work on an existing external repository. It is not another Space and does not automatically add active context or capabilities.
+**Project Workspace** — An optional local directory for one bounded project or initiative within a Space. An Instance or Space can choose a convention such as `work/<project-id>/` with its own documentation. It is not another Space and does not automatically add active context or capabilities.
 _Avoid_: Space, external `project` link, capability Source
+
+**Working Link** — An optional Space-root symlink to an external working directory, not an instruction or capability source. Core recognizes the generic names `project` and `documentation`; the owning Instance can declare additional names.
 
 **Space Configuration Assistant** — The explicit OpenCode Mini session started by `space-configure` to curate one Space's `skills` and `mcp` fields. Skills come from valid Core and owning-Instance candidates; MCP recommendations follow the Space purpose and may include services not configured yet. Harnessia, not the agent, validates and prepares the approved result. Installation and authentication remain separate approved operations.
 _Avoid_: General work launcher, automatic Source discovery, autonomous editor
@@ -47,7 +49,7 @@ _Avoid_: OpenCode configuration, Claude plugin
 **Effective Space Context** — The ordered active Markdown and validated Capability inventories resolved for one Space. Markdown follows Core → Instance → Space priority within its defined role; later paths have higher priority.
 _Avoid_: Every Markdown file, Client Projection
 
-**Collaboration Contract** — The shared task, validation, capability and approval rules in Core `INSTRUCTIONS.md`, specialized by each Space's purpose. It is instruction-level guidance, not runtime enforcement or permission expansion.
+**Collaboration Contract** — Shared operational rules an Instance may keep in its own `INSTRUCTIONS.md` for its Spaces. It is instruction-level guidance, not runtime enforcement or permission expansion.
 _Avoid_: Autonomous runtime, capability inheritance
 
 **Consumer** — Core or a Space when selecting Capabilities from Sources.

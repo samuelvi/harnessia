@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-Harnessia crea espacios de trabajo de IA centrados en una tarea llamados Spaces. Un Space es un pseudoproyecto que mantiene las reglas y capacidades para colaborar con la IA separadas del proyecto real y su documentación anexa. Tú eliges lo que necesita cada Space; Harnessia lo valida y genera la configuración para OpenCode y Claude Code.
+Harnessia crea Spaces para colaborar con la IA. Cada Space mantiene sus reglas y capacidades separadas de los proyectos y la documentación con los que trabaja. Tú eliges lo que necesita cada Space; Harnessia valida la selección y genera la configuración para OpenCode y Claude Code.
 
 Las capacidades permanecen en sus Sources originales. Harnessia las enlaza en lugar de copiarlas o reescribirlas.
 
@@ -15,8 +15,9 @@ Las capacidades permanecen en sus Sources originales. Harnessia las enlaza en lu
 | Concepto | Significado |
 | --- | --- |
 | **Core** | El proyecto central de Harnessia dentro de `Core/`. Contiene el motor, el contexto compartido, los Sources compartidos y la documentación. |
-| **Instance** | Un contenedor local registrado para Spaces, Sources y contexto compartido opcional relacionados. Puede estar en cualquier lugar y no necesita ser un repositorio Git. |
-| **Space** | Un pseudoproyecto de colaboración con la IA para un propósito concreto dentro de una Instance. Define las reglas y capacidades para trabajar con un proyecto real y su documentación anexa. |
+| **Instance** | Contenedor local para Spaces y Sources relacionados, con configuración y contexto compartidos opcionales. Puede estar en cualquier lugar y no necesita ser un repositorio Git. |
+| **Space** | Entorno de colaboración con la IA para un propósito concreto dentro de una Instance. Ábrelo directamente en el cliente de IA. |
+| **Project Workspace** | Directorio opcional dentro de un Space para un proyecto o iniciativa, por ejemplo `work/<project-id>/`. |
 | **Source** | Un repositorio o directorio mantenido que proporciona capacidades de IA reutilizables. Pertenece a Core o a una Instance. |
 | **Capability** | Una skill, agent o command reutilizable que se selecciona desde un Source sin copiarla. |
 | **Definition** | La selección de capacidades independiente del cliente: `HARNESSIA.md` para Core o `SPACE.md` para un Space. |
@@ -31,7 +32,7 @@ Core
     └── Space
 ```
 
-El contexto se hereda en ese orden; las capas posteriores tienen mayor prioridad. El repositorio versiona el proyecto `Core/`, no las Instances locales. Las Instances se registran en `.harnessia/instances.yaml`, situado dentro de Core e ignorado por Git; solo se descubren las Instances registradas explícitamente. Core no incluye Instances instaladas ni vínculos a espacios de trabajo externos; los nombres y rutas que aparecen a continuación son ejemplos.
+El contexto se hereda en ese orden; las capas posteriores tienen mayor prioridad. El repositorio versiona `Core/`, no las Instances locales. Una Instance puede existir sin estar registrada. La CLI solo descubre Instances a través del registro `.harnessia/instances.yaml`, situado dentro de Core e ignorado por Git. Core se distribuye sin Instances ni enlaces de trabajo locales; los nombres y rutas siguientes son ejemplos.
 
 ## Primeros pasos
 
@@ -58,24 +59,24 @@ bash docs/wip/space-setup.sh
 
 La sección de configuración explica cada valor:
 
-- `INSTANCE` es el nombre registrado y sensible a mayúsculas de la Instance, como `Work`.
-- `INSTANCE_PATH` es su directorio absoluto, como `$HOME/Harnessia/Work`. La plantilla no proporciona deliberadamente ningún valor predeterminado para esta variable.
-- `SPACE` es el ID en minúsculas del Space, como `atlas`.
+- `INSTANCE` es el nombre de la Instance y distingue mayúsculas de minúsculas. La plantilla usa `Default` si no se indica otro nombre; el motor no le da un significado especial.
+- `INSTANCE_PATH` es el directorio absoluto de la Instance. Indícalo expresamente; la plantilla no tiene una ruta predeterminada.
+- `SPACE` es el ID en minúsculas del Space. La plantilla usa `atlas` si no se indica otro.
 
 El script es fail-closed y ejecuta esta secuencia:
 
 - Si no existe el directorio de la Instance, `instance-create` crea su estructura mínima y la registra. Si el directorio ya existe, `instance-attach` lo valida y registra sin volver a crearlo. Un directorio existente debe ser ya una Instance válida.
-- `sources-clone` instala los Sources fijados que falten para que el curador pueda considerar sus skills.
+- `sources-clone INSTANCE=<id>` instala los Sources fijados que falten en Core y en la Instance elegida para que el curador pueda considerar sus skills.
 - Si no existe la ruta del Space, `space-create` lo crea y prepara. Un directorio regular sin `SPACE.md` se inicializa mediante `space-attach`, que añade solo los archivos Harnessia ausentes y conserva todo el contenido previo. Una ruta con un `SPACE.md` regular ya está inicializada y se omite su creación. Las demás colisiones se conservan y reportan.
 - `space-configure` requiere la Instance registrada y el Space existente. Abre el curador, recomienda skills y servidores MCP según el objetivo, aplica solo una selección aprobada explícitamente y prepara las proyecciones de ambos clientes. Puede recomendar servidores que falten, pero nunca los instala ni autentica.
 - `check` termina con una validación de solo lectura de la Instance objetivo.
 
-`INSTANCE` y `SPACE` no son intercambiables: usa `INSTANCE=Work SPACE=atlas`, no al revés. Los nombres de Instance distinguen mayúsculas y minúsculas; los IDs de Space usan letras minúsculas, dígitos y guiones simples.
+`INSTANCE` nombra el contenedor; `SPACE` nombra un Space dentro de él. Los IDs de Space usan letras minúsculas, dígitos y guiones simples.
 
 La plantilla también puede ejecutarse sin copiarla si se proporcionan todos los valores mediante el entorno:
 
 ```sh
-INSTANCE=Work INSTANCE_PATH="$HOME/Harnessia/Work" SPACE=atlas \
+INSTANCE=Default INSTANCE_PATH="$HOME/Harnessia/Default" SPACE=atlas \
   bash templates/space-setup.sh
 ```
 
@@ -101,7 +102,7 @@ Para usar un Space, abre directamente su directorio en OpenCode o Claude Code. H
 
 `make prepare-core` sirve específicamente para trabajar en el propio Harnessia. Lee la Core Definition de `HARNESSIA.md`, valida las skills de mantenimiento seleccionadas y genera la configuración de clientes de Core: enlaces relativos bajo `.opencode/skills/` y un único plugin de Claude bajo `.claude/skills/harnessia-core/`. No prepara ningún Space.
 
-`make prepare INSTANCE=<id> SPACE=<space-id>` genera o actualiza la configuración de clientes de un Space existente. Resuelve las reglas heredadas de Core, su Instance y el propio Space, valida la selección de capacidades de `SPACE.md` y genera las proyecciones de OpenCode y Claude Code gestionadas por Harnessia para ese Space. No crea el Space, no modifica el proyecto real ni la documentación enlazados, no actualiza Sources y no inicia ningún cliente de IA.
+`make prepare INSTANCE=<id> SPACE=<space-id>` resuelve el contexto activo y valida la selección de capacidades de `SPACE.md` antes de generar las proyecciones de ambos clientes para un Space existente. No crea el Space, no modifica contenido enlazado, no actualiza Sources y no inicia ningún cliente de IA.
 
 `make space-create INSTANCE=<id> SPACE=<space-id>` crea un Space nuevo solo cuando no existe el directorio de destino. Escribe un `SPACE.md` mínimo, un `SOUL.md` mantenido vacío y un `INSTRUCTIONS.md` mínimo; después valida y prepara el Space. Si falla la creación o la preparación, Harnessia elimina la nueva estructura; nunca sobrescribe una ruta existente.
 
@@ -111,7 +112,7 @@ Para usar un Space, abre directamente su directorio en OpenCode o Claude Code. H
 
 Cuando OpenCode Mini termina correctamente, Harnessia solo acepta cambios en `skills` y `mcp` del `SPACE.md` objetivo, valida la selección y prepara ambas proyecciones de cliente. Si no hay un cambio aprobado, no ejecuta la preparación. Una interrupción, una salida no cero del cliente, una selección inválida, cambios fuera de esos campos o un fallo de preparación restauran la Definition original y las proyecciones anteriores. Cada ejecución guarda `SPACE.before.md`, `skills.jsonl`, el inventario saneado `mcp-inventory.json` y, cuando corresponde, `SPACE.proposed.md` bajo `.harnessia/space-configure/<Instance>/<Space>/<run-id>/` dentro de Core, ignorado por Git. Si falla el inventario, la disponibilidad es desconocida, no una ausencia de servidores. Define `HARNESSIA_OPENCODE` solo cuando el ejecutable no sea el `opencode` disponible en `PATH`.
 
-`INSTANCE` es el nombre registrado y sensible a mayúsculas de la Instance. Harnessia conserva su capitalización: una Instance registrada como `Work`, por ejemplo, se selecciona con `INSTANCE=Work`. Volver a adjuntar la misma ruta cambiando solo la capitalización migra un nombre antiguo en minúsculas.
+`INSTANCE` debe respetar las mayúsculas y minúsculas del registro. Volver a adjuntar la misma ruta con un cambio solo de mayúsculas y minúsculas actualiza el nombre registrado.
 
 Para la regeneración habitual de todo el sistema, usa `make prepare-all`; siempre valida Core y todos los Spaces registrados antes de reemplazar cualquier configuración generada para los clientes. Para regenerar solo los Spaces de una Instance, usa `make prepare-instance INSTANCE=<id>`. `make check` valida sin escribir y puede seguir usando `INSTANCE=<id>` para limitar su ámbito, mientras que `make verify` ejecuta los tests, las comprobaciones de Sources y la comprobación completa de solo lectura. La preparación no actualiza Sources, no cambia el contenido enlazado ni inicia ningún cliente de IA; solo `space-configure` abre OpenCode Mini para su sesión interactiva de curación explícita. Los logs se guardan en `logs/` dentro de Core, ignorado por Git.
 
@@ -121,12 +122,14 @@ Core y cada Instance son propietarios de sus Sources. Los Sources Git reproducib
 
 | Tarea | Comando |
 | --- | --- |
-| Clonar los Sources fijados que falten | `make sources-clone` |
+| Clonar los Sources fijados que falten | `make sources-clone [INSTANCE=<id>]` |
 | Validar los Sources y todo lo que los usa | `make sources-check` |
 | Mostrar cambios locales y remotos conocidos | `make sources-status` |
 | Actualizar los remotos sin cambiar los worktrees | `make sources-fetch` |
 | Avanzar a las revisiones revisadas | `make sources-pull` |
 | Validar, preparar y registrar las revisiones modificadas | `make sources-reconcile` |
+
+Con `INSTANCE=<id>`, la clonación se limita a Core y a esa Instance registrada. Sin ese parámetro, incluye todas las Instances registradas. Los demás comandos de Sources operan sobre todos los propietarios registrados.
 
 El flujo de actualización es explícito:
 
@@ -148,15 +151,11 @@ El Source `googlechrome-modern-web-guidance`, de Google Chrome, proporciona `ski
 
 ## Qué contiene un Space
 
-El [contrato de colaboración compartido](INSTRUCTIONS.md) adapta el rigor y la validación al desarrollo, investigación, consultoría, backlog o documentos. Prefiere los métodos Matt Pocock seleccionados que encajan, usa Caveman para un chat conciso, excluye Superpowers y exige que el usuario elija antes de añadir agentes, consulta especializada o worktrees. El curador recomienda Caveman y solo las skills Matt adecuadas al propósito; la selección requiere aprobación exacta y no se hereda automáticamente. Los Spaces nuevos empiezan con selecciones vacías hasta configurarlos.
+Cada Instance puede mantener sus reglas de colaboración en su propio `INSTRUCTIONS.md`. Solo los Spaces de esa Instance las heredan. El curador lee esas reglas cuando existen; las selecciones de skills y MCP siguen requiriendo aprobación exacta. Los Spaces nuevos empiezan con selecciones vacías hasta configurarlos.
 
-El trabajo de varios pasos conserva un único checkpoint retomable al cerrar fases o interrumpirse, usando el registro de la tarea y la memoria local opcional y acotada. Registra progreso verificado, decisiones, comprobaciones, bloqueos y siguiente acción, no conversaciones ni preferencias aprendidas. Las instrucciones y guías mantenidas de Harnessia están en inglés salvo esta guía; se conservan evidencias históricas, textos de terceros e idiomas solicitados para entregables. `caveman-compress` no es una operación por defecto.
+Un Space es independiente de los proyectos con los que trabaja. `SOUL.md` registra preferencias explícitas y duraderas de colaboración, `INSTRUCTIONS.md` define las reglas operativas y `SPACE.md` selecciona capacidades desde `core/<source-id>` e `instance/<source-id>`. Los [enlaces de trabajo](docs/space-definition.md#working-links) opcionales conectan proyectos y documentación externos.
 
-Un Space no es el proyecto real. Es el pseudoproyecto que abres en el cliente de IA para mantener las reglas de colaboración controladas y separadas del contenido de trabajo. Dentro, `SOUL.md` registra preferencias explícitas y duraderas sobre el estilo y criterio de colaboración, `INSTRUCTIONS.md` define las reglas operativas, `SPACE.md` selecciona capacidades desde `core/<source-id>` e `instance/<source-id>`, y los enlaces opcionales `project` y `documentation` conectan el proyecto real y su documentación anexa.
-
-Dentro de un Space, cada proyecto o iniciativa acotada tiene su propio `work/<project-id>/`, con `docs/sources/`, `docs/wip/` y `docs/deliverables/` dentro. El código local puede convivir con esos docs; los repositorios externos existentes permanecen en sus checkouts autorizados. El `docs/` del Space se reserva para plantillas realmente compartidas y evidencias de configuración. Esta convención de trabajo heredada no crea otro Space, no traslada la documentación de Core ni activa automáticamente instrucciones anidadas. Véanse las [reglas compartidas de artefactos](INSTRUCTIONS.md#project-workspaces-and-artifacts).
-
-Harnessia resuelve el contexto activo de menor a mayor prioridad: SOUL de Core, SOUL opcional de la Instance, SOUL del Space, instrucciones de Core, instrucciones opcionales de la Instance, instrucciones del Space y memoria opcional del Space. Las capas posteriores especializan el comportamiento local; el contrato compartido prohíbe debilitar silenciosamente las reglas de seguridad y aprobación, y las skills o la memoria no amplían permisos. Es un contrato de instrucciones, no una resolución semántica determinista de conflictos ni una sandbox de ejecución. El SOUL de un Space es un archivo regular mantenido que puede empezar vacío; Harnessia nunca lo reescribe y un cliente de IA solo debe actualizarlo cuando el usuario solicite explícitamente una preferencia duradera.
+Harnessia resuelve el contexto activo de menor a mayor prioridad: SOUL de Core, SOUL opcional de la Instance, SOUL del Space, instrucciones opcionales de la Instance, instrucciones del Space y memoria opcional del Space. Los Spaces no heredan las reglas de mantenimiento de Core en `AGENTS.md`. El orden no resuelve conflictos semánticos ni impone permisos en tiempo de ejecución. El SOUL de un Space es un archivo regular mantenido que puede empezar vacío; Harnessia nunca lo reescribe y un cliente de IA solo debe actualizarlo cuando el usuario solicite explícitamente una preferencia duradera.
 
 `INDEX.md`, `SPACE.md`, los README y la documentación siguen siendo navegación, definiciones o material de consulta; Harnessia no activa cada archivo Markdown como instrucción. Core ejecuta la orquestación y genera paths relativos para cada cliente, por lo que Core y las Instances pueden vivir en ubicaciones no relacionadas del sistema de archivos.
 

@@ -14,7 +14,7 @@ Use `HARNESSIA.md` as the Core Definition. Resolve it into one client-agnostic `
 
 The OpenCode adapter projects relative links for the selected skills under `.opencode/skills/`. Prepared Spaces continue denying all skills before allowing only their own effective IDs.
 
-The Claude adapter generates an isolated skills-directory plugin under `.claude/skills/`. Its default `skills/` directory contains relative links only to selected Source skills. Before writing, the adapter proves that the Source `.claude-plugin/plugin.json` exposes exactly the selection and that neither manifest fields nor standard plugin locations add other components. The wrapper is required because linking the Source directory directly would let Claude's default `skills/` scan discover unselected sibling skills. Claude loads the generated plugin only when Core is the primary directory, so sessions opened directly in a Space do not inherit it.
+The Claude adapter generates an isolated skills-directory plugin under `.claude/skills/`. Its default `skills/` directory contains relative links only to selected Source skills. The original design also checked Source plugin metadata before writing; [ADR 0003](0003-generated-core-claude-plugin.md) supersedes that requirement. The wrapper prevents unselected siblings from being exposed by Claude's skill scan. Claude loads it only when Core is the primary directory.
 
 Both adapters are validated and replaced in one transaction. Core is a Source Consumer, not a Space.
 
@@ -24,7 +24,7 @@ Both adapters are validated and replaced in one transaction. Core is a Source Co
 - Capability bodies remain in their Source.
 - The original design allowed a Source plugin manifest change to block check or reconciliation; [ADR 0003](0003-generated-core-claude-plugin.md) removed that coupling.
 - Claude Core skills use a plugin namespace and generated wrapper; OpenCode Core skills retain their normal IDs.
-- Core Sources must provide a compatible Claude plugin manifest. There is no fallback that copies skill bodies or exposes flat Core skills.
+- The original Source manifest requirement is superseded. The adapter still does not copy skill bodies or expose flat Core skills.
 - Core and Space projections have separate ownership and isolation contracts.
 
 ## Rejected alternatives

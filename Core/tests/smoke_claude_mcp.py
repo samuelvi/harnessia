@@ -28,7 +28,6 @@ def main() -> int:
         space = instance.spaces / "mcp-fixture"
         space.mkdir(parents=True)
         (root / "SOUL.md").write_text("")
-        (root / "INSTRUCTIONS.md").write_text("# Synthetic fixture\n")
         (space / "SOUL.md").write_text("")
         (space / "INSTRUCTIONS.md").write_text("# Synthetic fixture\n")
         (space / "SPACE.md").write_text(

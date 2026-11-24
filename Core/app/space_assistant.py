@@ -9,6 +9,7 @@ import subprocess
 import sys
 from uuid import uuid4
 
+from .context import instance_instructions_path
 from .layout import CoreLayout, InstanceLayout
 from .mcp_inventory import read_mcp_inventory
 from .prepare import PrepareResult, prepare_instance
@@ -57,16 +58,20 @@ def _prompt(
     guide: Path,
     instance_id: str,
     space_id: str,
+    instance_instructions: Path | None,
 ) -> str:
+    policy = (
+        f"Read the shared collaboration policy at {instance_instructions}.\n"
+        if instance_instructions is not None
+        else ""
+    )
     return (
         f"Configure the skills and MCP selection for Harnessia Space {instance_id}/{space_id}.\n"
         f"The client-agnostic definition is {definition}.\n"
         f"The local candidate index is {catalog}.\n"
         f"The sanitized OpenCode MCP inventory is {inventory}.\n"
         f"The MCP recommendation guide is {guide}.\n"
-        f"Read the shared collaboration policy at {guide.parent.parent / 'INSTRUCTIONS.md'}.\n"
-        "Recommend caveman for concise chat and purpose-appropriate Matt Pocock skills, "
-        "not the entire catalog. Exclude Superpowers and default caveman-compress. "
+        f"{policy}"
         "Recommend MCP servers by purpose, including useful servers not configured. "
         "Do not install or authenticate anything; separate recommendations from availability. "
         f"Use skills only from Core and Instance {instance_id}; do not search "
@@ -156,6 +161,7 @@ def configure_space(
             )
         before = definition_path.read_text()
         before_mode = stat.S_IMODE(definition_path.stat().st_mode)
+        instance_instructions = instance_instructions_path(instance)
     except OSError as error:
         raise HarnessiaError(f"cannot read Space Definition: {error}") from error
 
@@ -199,6 +205,7 @@ def configure_space(
             core.directory / "docs/mcp-guide.md",
             instance.id,
             space_id,
+            instance_instructions,
         ),
     )
     try:

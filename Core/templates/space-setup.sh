@@ -5,14 +5,14 @@
 # Copy this file to Core/docs/wip/, adjust the three values below and run it with
 # Bash. You can also override any value through the environment, for example:
 #
-#   INSTANCE=Work INSTANCE_PATH="$HOME/Harnessia/Work" SPACE=atlas \
+#   INSTANCE=Default INSTANCE_PATH="$HOME/Harnessia/Default" SPACE=atlas \
 #     bash templates/space-setup.sh
 
 set -Eeuo pipefail
 
 # INSTANCE is the registered, case-sensitive Instance name.
-# Examples: Work, Customer-A.
-INSTANCE="${INSTANCE:-Work}"
+# Default is a template value, not a reserved name or an installed Instance.
+INSTANCE="${INSTANCE:-Default}"
 
 # INSTANCE_PATH is the absolute directory that contains the Instance.
 # It has no default: set it to a real location on this machine. An existing
@@ -59,9 +59,9 @@ else
   make instance-create INSTANCE="$INSTANCE" INSTANCE_PATH="$INSTANCE_PATH"
 fi
 
-# Install every missing pinned Source so the skill curator sees the complete
-# local catalog. Existing Source directories are never replaced.
-make sources-clone
+# Install missing pins from Core and this Instance for the curator's catalog.
+# Existing Source directories are never replaced.
+make sources-clone INSTANCE="$INSTANCE"
 
 SPACE_PATH="$INSTANCE_PATH/spaces/$SPACE"
 

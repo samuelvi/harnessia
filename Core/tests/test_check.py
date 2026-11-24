@@ -20,7 +20,6 @@ class ReadOnlyCheckTest(unittest.TestCase):
             parents=True
         )
         (self.core.directory / "SOUL.md").write_text("# Core soul\n")
-        (self.core.directory / "INSTRUCTIONS.md").write_text("# Core instructions\n")
         (self.core.directory / "HARNESSIA.md").write_text(
             "---\nversion: 1\nskills: []\n---\n\n# Core\n"
         )
